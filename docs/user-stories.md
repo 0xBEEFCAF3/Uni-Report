@@ -2,15 +2,15 @@
 #1.
 
 As a log-in user, I want to be able to save any of the school characteristics that I like to an organized list. 
-I am expecting seeing a bunch of options that I can click to find my ideal colleges after I logged in. There should at least be "location", "average SAT score", and "tuition fees". After I saved the school characteristics in to an organized list, the web application should give me a list of school that matches my preference. 
+I am expecting seeing a bunch of options that I can click to find my ideal colleges after I logged in. There should at least be "location", "average SAT score", and "tuition fees". If I click one of the schools on the list, I want to see its information and I want to save it on my list if I like it. Whenever I log in, the web app should show me the list what I saved. 
 
 
 
 #2.
 
-As a log-in user, I want to get a list of schools that I am qualified.                                                                             
-If I put my information such as GPA, SAT score, and AP scores, the web application will save my information and will show me the schools which my condition meets their requirements. 
-If I click one of the schools on the list, I want to see its information and I want to save it on my list if I like it. Whenever I log in, the web app should show me the list what I saved. 
+As a log-in user, I want to customize my portal with my accomplishments, test scores, school interests, etc. to get possible college matches. This way, every time I log on, I don't have to re-enter my statistics to see if I have a possible "chance" for a university of my choice. I want to have the option to categorize schools that are of interest as safety, match, or reach. The customization option should also suggest other schools that could possibly interest me. 
+
+
 
 #3.
 
