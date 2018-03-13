@@ -15,12 +15,16 @@ var app = module.exports = express.createServer();
 // Configuration
 
 app.configure(function(){
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
+  app.set('views', __dirname + '/views/pages');
+  app.set('view engine', 'ejs');
+  //app.engine('jsx', require('express-react-views').createEngine());
+
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
+  app.locals({ layout: false }) // app level default
+  app.set('view options', { layout: false }) // pretty much same as above
 });
 
 app.configure('development', function(){
@@ -34,10 +38,19 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', function(req, res){
-  res.write("String(test)");
-  res.end();
+  res.json("route");
 });
 
+
+
+app.get('/schoolreport/:uniName', function(req, res) {
+    let uniName = req.params.uniName;
+    res.render('school-report', {
+        uniName:String(uniName.replace("+", " ")),
+        uniNameApiString:String(uniName)
+        
+    });
+});
 
 
 app.get('/rmp/:uniName', function(req, res){
