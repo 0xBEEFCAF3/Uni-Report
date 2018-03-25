@@ -93,7 +93,10 @@ var Bundle = class Bundle {
   		});
 
 
-  		const btn = React.createElement('button', {type:"button", className:"btn btn-primary", onClick:
+  		const btn = React.createElement('button', {type:"button", className:"btn btn-primary",
+  		style:{color:'black'},
+
+  		 onClick:
   			function(e){
 	  			e.preventDefault();
 	  			let schoolName = _this.state.inputValue;
@@ -106,7 +109,7 @@ var Bundle = class Bundle {
   				window.location.replace("http://localhost:8080/schoolreport/" + schoolName);	//switch localhost with something global variable
   			}
 
-  		});
+  		}, "Search");
   		const span = React.createElement('span', {className:"input-group-btn"}, [btn]);
 
 		const container = React.createElement('div', {}, [input,span]);
