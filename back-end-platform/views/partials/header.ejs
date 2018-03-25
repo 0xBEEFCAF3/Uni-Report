@@ -9,10 +9,13 @@
 				<div class="navbar-btn">
 					<button type="button" class="btn-toggle-fullwidth"><i class="lnr lnr-arrow-left-circle"></i></button>
 				</div>
-				<form class="navbar-form navbar-left">
-					<div class="input-group">
+
+				<form class="navbar-form navbar-left nav-search">
+					<div class="input-group" id="nav-search">
+					<!--
 						<input type="text" value="" class="form-control" placeholder="Search dashboard...">
 						<span class="input-group-btn"><button type="button" class="btn btn-primary">Go</button></span>
+						-->
 					</div>
 				</form>
 				
@@ -84,3 +87,18 @@
 			</div>
 		</div>
 		<!-- END LEFT SIDEBAR -->
+
+		<script>
+				//header JS
+				$(document).ready(function(){
+					console.log("ready to go");
+
+					const bundle = new Bundle();
+					//set up events 
+
+					//search button
+					bundle.searchHelper();
+					
+				});
+
+		</script>

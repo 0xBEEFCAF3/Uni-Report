@@ -305,4 +305,20 @@
 		</div>
 		<!-- END MAIN -->
 
+		<script>
+
+				$(document).ready(function(){
+					console.log("ready to go");
+
+					const bundle = new Bundle();
+					console.log(bundle);
+
+					const schoolName = "<%= uniNameApiString %>";
+
+					bundle.rmpHelper(schoolName);
+					
+				});
+
+		</script>
+
 		<% include ../partials/footer %>

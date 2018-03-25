@@ -12,13 +12,12 @@ var Bundle = class Bundle {
   		}
 
   		fetchRMPInfo(){
-  			let uri = "http://localhost:8080/rmp/" + schoolName;
+  			let uri = "http://localhost:8080/rmp/" + schoolName; //have to use something else not localhost
   			let temp;
   			let _this = this;
   			var result = fetch(uri).then(response =>{
   				temp = response.json();
   				return temp;
-  				//console.log(temp);
   			}).then(function(data){
   				//console.log(data);
   				_this.setState((prevState, props) => {
@@ -28,9 +27,7 @@ var Bundle = class Bundle {
   		}
 
   		componentWillMount(){
-  			//console.log("did it mount");
   			this.fetchRMPInfo();
-  			
   		}
 
   		render(){
@@ -48,7 +45,6 @@ var Bundle = class Bundle {
   				*/
 
   				const title = React.createElement('h1', {}, 'University Properties');
-				//const paragraph = React.createElement('p', {}, 'Writing some more HTML. Cool stuff!');
 				const food = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.FOOD);
 				const internet = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.INTERNET);
 				const reputation = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.REPUTATION);
@@ -58,15 +54,9 @@ var Bundle = class Bundle {
 				const oppurtunity = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.OPPORTUNITY);
 				const social = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.SOCIAL);
 				const container = React.createElement('div', {}, [title, food, internet,reputation, clubs, facilities, oppurtunity, social]);
-				/*
-  				return React.createElement("div", {}, 
-					  "University Properties:",
-					  React.createElement("i",{className:"fas fa-utensils"},"Food",
-					  React.createElement("i",{className:"fas fa-browser"},"Internet")
-					)
-			)};*/
+				
 				return container;}
-
+			//ELSE
             return React.createElement('div', null, "loading..." + '!');
         }
 
@@ -77,27 +67,81 @@ var Bundle = class Bundle {
   	return RMPComp;
   }
 
+  createSearchComp(){
+  	var searchComp = class searchComp extends React.Component{
 
-  rmpProperty(){
-  	var RMPProperty = class RMPComp extends React.Component{
+  		constructor(){
+  			super();
+  			this.state = {};
+  		}
+
+  		updateInputValue(evt){
+		    this.setState({
+		      inputValue: evt.target.value
+		    });
+		  }
+
+  		render(){
+  		var _this = this;
+  		const input = React.createElement('input', {className:"form-control nav_input","type":"text", onChange: 
+  			function(evt){
+
+  			 	_this.setState({
+			      inputValue: evt.target.value
+			    });
+  			 }
+  		});
 
 
+  		const btn = React.createElement('button', {type:"button", className:"btn btn-primary", onClick:
+  			function(e){
+	  			e.preventDefault();
+	  			let schoolName = _this.state.inputValue;
+	  			if(schoolName == null || schoolName == undefined || schoolName == ""){
+	  				return false;
+	  			}
+	  			console.log(schoolName);
+	  			schoolName = schoolName.replace(" ","+");
+	  			//redirect user to 
+  				window.location.replace("http://localhost:8080/schoolreport/" + schoolName);	//switch localhost with something global variable
+  			}
 
+  		});
+  		const span = React.createElement('span', {className:"input-group-btn"}, [btn]);
+
+		const container = React.createElement('div', {}, [input,span]);
+  		return container;
+
+  		}
   	}
 
-  	return RMPProperty;
 
-  }
+
+  	return searchComp;
+}
 
   
+
+  /*******************
+  	Helper Functions
+  ********************/
 
   rmpHelper(schoolName){
   	let RMPComp = this.createRMPComp(schoolName);
 
   	ReactDOM.render(
-                    React.createElement(RMPComp, { name : 'Armin' }),
+                    React.createElement(RMPComp, {}),
                     document.getElementById('rmp')
     );
+  }
+
+  searchHelper(){
+  	let searchComp = this.createSearchComp();
+  	ReactDOM.render(
+                    React.createElement(searchComp, {}),
+                    document.getElementById('nav-search')
+    );
+
   }
 
 
