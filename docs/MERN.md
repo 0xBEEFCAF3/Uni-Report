@@ -1,0 +1,3 @@
+Why did we choose MERN? 
+
+When choosing the technology stacks for our project, we came down to the three common frameworks that are typically used written in JavaScript since we are more familiar with it: Meteor, MERN, and MEAN. Comparing MERN and MEAN, we figured out our websites will be mostly information based, which the users will just view our information, and that aligns with what React does. In addition, React work more efficiently checking the state change of records with larger data sets than Angular. When comparing Meteor and MERN, although Meteor is faster to learn, most API we found are written in MERN form. If we had to pick a second choice, MEAN will be it because we believe MEAN has more potential than Meteor. 
