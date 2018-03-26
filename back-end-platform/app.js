@@ -46,8 +46,8 @@ app.get('/rmp/:uniName', function(req, res){
   let uniName = req.params.uniName;
   let url = 'http://www.ratemyprofessors.com/search.jsp?query='+ uniName;
   let sid;
-  
-   
+
+
   request(url, function(error, response, html){
       if(!error){
           var $ = cheerio.load(html);
@@ -80,27 +80,27 @@ app.get('/rmp/:uniName', function(req, res){
                 let rating = $(this).children()[1];
                 let cat =  $(this).children()[2];
                 ratings[$(cat).text()] = $(rating).text();
-                //console.log($(rating).text(), $(cat).text());  
+                //console.log($(rating).text(), $(cat).text());
 
             });
             console.log(ratings);
             res.json(ratings);
-            
+
 
             }
 
           });
-      
+
       }
 
     });//first request
 
-    
+
 
 
 
 //end of the rmp route
-    
+
 })
 
 
