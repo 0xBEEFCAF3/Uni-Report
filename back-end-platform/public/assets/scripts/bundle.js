@@ -45,14 +45,14 @@ var Bundle = class Bundle {
   				*/
 
   				const title = React.createElement('h1', {}, 'University Properties');
-				const food = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.FOOD);
-				const internet = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.INTERNET);
-				const reputation = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.REPUTATION);
-				const clubs = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.CLUBS);
-				const facilities = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.FACILITIES);
-				const location = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.LOCATION);
-				const oppurtunity = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.OPPORTUNITY);
-				const social = React.createElement("i",{className:"fas fa-utensils"},": "+ RMPData.SOCIAL);
+				const food = React.createElement("i",{className:"fas fa-utensils",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.FOOD + "-- Food");
+				const internet = React.createElement("i",{className:"fab fa-internet-explorer",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.INTERNET + "-- Internet");
+				const reputation = React.createElement("i",{className:"fas fa-book",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.REPUTATION + "-- Reputation");
+				const clubs = React.createElement("i",{className:"fas fa-users",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.CLUBS + "-- Clubs");
+				const facilities = React.createElement("i",{className:"fas fa-building",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.FACILITIES + "-- Facilities");
+				const location = React.createElement("i",{className:"fas fa-map-marker",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.LOCATION + "-- Location");
+				const oppurtunity = React.createElement("i",{className:"fas fa-handshake",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.OPPORTUNITY + "-- Oppurtunity");
+				const social = React.createElement("i",{className:"fas fa-user",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.SOCIAL + "-- Social");
 				const container = React.createElement('div', {}, [title, food, internet,reputation, clubs, facilities, oppurtunity, social]);
 				
 				return container;}

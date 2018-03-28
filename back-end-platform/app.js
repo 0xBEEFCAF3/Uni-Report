@@ -78,7 +78,7 @@ app.get('/rmp/:uniName', function(req, res){
 
       //request to get info
           //URL EXAMPLE http://www.ratemyprofessors.com/campusRatings.jsp?sid=1280
-
+          
           let ratingURL =  "http://www.ratemyprofessors.com/campusRatings.jsp?" + sid;
           console.log("the rating url and sid");
           console.log(ratingURL, sid);
@@ -96,6 +96,7 @@ app.get('/rmp/:uniName', function(req, res){
                 //console.log($(rating).text(), $(cat).text());  
 
             });
+            
             console.log(ratings);
             res.json(ratings);
             
