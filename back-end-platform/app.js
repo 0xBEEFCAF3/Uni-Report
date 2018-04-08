@@ -42,6 +42,41 @@ app.get('/', function(req, res){
   res.json("route");
 });
 
+app.get('/info/:uniName', function(req, res){
+  let uniName = req.params.uniName;
+  var finished = _.after(1, respond);
+  let infoUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+
+  "&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,school.state,school.zip,school.school_url";
+ 
+
+});
+
+app.get('/price/:uniName', function(req, res){
+  let uniName = req.params.uniName;
+  var finished = _.after(1, respond);
+  let priceUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.price_calculator_url";
+  //school.price_calculator_url
+  let price;
+
+  request(priceUrl, function (error, response, body) {
+    if (error) throw new Error(error);
+    body = JSON.parse(body);
+    if (body.metadata.total <= 0 ){
+      price = null;
+      res.json("No results");
+      return;
+    }
+    price = body.results[0]["school.price_calculator_url"];
+    finished();
+  });
+
+  function respond(){
+    res.json({"price": price, "title":"School price calculator"});
+  }
+
+});
+
+
 app.get('/earnings/gender/:uniName', function(req, res){
   let uniName = req.params.uniName;
   uniName = uniName.replace("+", "%20");
@@ -78,7 +113,7 @@ app.get('/earnings/gender/:uniName', function(req, res){
   });
 
   function respond(){
-    res.json({"females":female, "males": male, "title":"Male and females entry ratoi"});
+    res.json({"females":female, "males": male, "title":"Male and females entry ratio"});
   }
 });
 
