@@ -42,7 +42,48 @@ app.get('/', function(req, res){
   res.json("route");
 });
 
-app.get('/earnings/:uniName', function(req, res){
+app.get('/earnings/gender/:uniName', function(req, res){
+  let uniName = req.params.uniName;
+  uniName = uniName.replace("+", "%20");
+  var finished = _.after(2, respond);
+
+  let femaleUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.female_students"
+  let maleUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.male_students"
+  
+  let female;
+  let mean;
+
+  request(femaleUrl, function (error, response, body) {
+    if (error) throw new Error(error);
+    body = JSON.parse(body);
+    if (body.metadata.total <= 0 ){
+      female = null;
+      res.json("No results");
+      return;
+    }
+    female = body.results[0]["2013.earnings.10_yrs_after_entry.female_students"];
+    finished();
+  });
+
+  request(maleUrl, function (error, response, body) {
+    if (error) throw new Error(error);
+    body = JSON.parse(body);
+    if (body.metadata.total <= 0 ){
+      male = null;
+      res.json("No results");
+      return;
+    }
+    male = body.results[0]["2013.earnings.10_yrs_after_entry.male_students"];
+    finished();
+  });
+
+  function respond(){
+    res.json({"females":female, "males": male, "title":"Male and females entry ratoi"});
+  }
+});
+
+
+app.get('/earnings/avg/:uniName', function(req, res){
   let uniName = req.params.uniName;
   uniName = uniName.replace("+", "%20");
   var finished = _.after(2, respond);
@@ -79,7 +120,7 @@ app.get('/earnings/:uniName', function(req, res){
   });
 
   function respond(){
-    res.json({"mean":mean, "median": median});
+    res.json({"mean":mean, "median": median, "title":"Median/Mean earnings 10 years after entry"});
   }
 
 });
