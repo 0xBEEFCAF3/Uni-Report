@@ -46,8 +46,33 @@ app.get('/info/:uniName', function(req, res){
   let uniName = req.params.uniName;
   var finished = _.after(1, respond);
   let infoUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+
-  "&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,school.state,school.zip,school.school_url";
- 
+  "&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,school.state,school.zip,school.city,school.school_url";
+
+  let state;
+  let zip;
+  let city;
+  let website;
+
+
+  request(infoUrl, function (error, response, body) {
+    if (error) throw new Error(error);
+    body = JSON.parse(body);
+    if (body.metadata.total <= 0 ){
+      price = null;
+      res.json("No results");
+      return;
+    }
+    state = body.results[0]["school.state"];
+    zip = body.results[0]["school.zip"];
+    city = body.results[0]["school.city"];
+    school_url = body.results[0]["school.school_url"];
+
+    finished();
+  });
+
+  function respond(){
+    res.json({"state": state,"zip": zip,"city":city,"school_url":school_url,"title":"Location and school website"});
+  }
 
 });
 
