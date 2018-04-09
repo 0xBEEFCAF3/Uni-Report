@@ -16,7 +16,8 @@
         "node-fetch": "^2.1.2",
         "nodemon": "^1.14.12",
         "react": "^16.2.0",
-        "request": "^2.83.0"
+        "request": "^2.83.0",
+        "yelp-fusion": "^2.0.3"
     },
     "devDependencies": {
         "babel-preset-env": "^1.6.1",
