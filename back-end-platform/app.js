@@ -11,8 +11,13 @@ var cheerio = require('cheerio');
 var _ = require('lodash');
 //const fetch = require("node-fetch");
 const yelp = require('yelp-fusion');
+const mongoose = require('mongoose');
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
 const apiKey = "goaICLvtD-bg3_zKg3e8nxfLrjHSjzQajtq23nupPs6-GKLGHIoQ1ZoitB-FT_SjBUrdlLUdhJX-gJlViIx_x575xjwmmYWDHG-BMwYPwzdolNP7xUR_HS0HjsvKWnYx";
 const client = yelp.client(apiKey);
+var cacheModel = require("./models/cache.js"); 
+
 var app = module.exports = express.createServer();
 
 // Configuration
@@ -38,69 +43,110 @@ app.configure('production', function(){
   app.use(express.errorHandler());
 });
 
+//set up DB
+
+// Connection URL
+const MongoUrl = 'mongodb://admin:admin@ds119718.mlab.com:19718/uni-report';
+let con = mongoose.connect(MongoUrl);
+let cache = mongoose.model('cache');
+
 // Routes
 app.get('/', function(req, res){
   res.json("route");
 });
 
-app.get('/location/:uniName', function(req, res){
-  let uniName = req.params.uniName;
-  var finished = _.after(1, getYelp);
-  //first we need the state city and zip -- call score card api
-  let infoUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+
-  "&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,school.state,school.zip,school.city,school.school_url";
-
-  let state;
-  let zip;
-  let city;
-
-
-  request(infoUrl, function (error, response, body) {
-    if (error) throw new Error(error);
-    body = JSON.parse(body);
-    if (body.metadata.total <= 0 ){
-      price = null;
-      res.json("No results");
-      return;
-    }
-    state = body.results[0]["school.state"];
-    zip = body.results[0]["school.zip"];
-    city = body.results[0]["school.city"];
-
-    finished();
+app.get('/displayCache', function(req, res){
+  cache.find(function(err, cache) {
+    res.send(cache);
   });
 
-  function getYelp(){
-     client.search({
-        location: state + " " + city + " " + zip
-      }).then(response => {
-        parseData(response.jsonBody);
-      }).catch(e => {
-        console.log(e);
-      });
-  }
+});
 
-  function parseData(data){
-    /**
-    *@param: (Json Object) 
-    **/
-    let dollars = [];
-    let ratings = [];
-    data = data["businesses"];
 
-    data.forEach(function(item,index,array){
-        ratings.push(item.rating);
-        dollars.push(item.price.length);
+app.get('/location/:uniName', function(req, res){
+  let uniName = req.params.uniName;
+  let cacheResponse = null;
+  //fist check cache
+  cacheModel.checkCache("/location", {uniName:uniName}).then(function(result) {
+        cacheResponse = result;
+        if(Object.keys(cacheResponse).length === 0 && cacheResponse.constructor === Object){
+          //case if api call is not in cache
+          callAPI();//just call the api
+          return;
+        }
+        res.json(cacheResponse);//send json'd cache object. 
+    
+    }, function(err) {
+        console.log(err);
+  });
 
+  function callAPI(){
+    var finished = _.after(1, getYelp);
+    //first we need the state city and zip -- call score card api
+    let infoUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+
+    "&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,school.state,school.zip,school.city,school.school_url";
+    let state;
+    let zip;
+    let city;
+
+
+    request(infoUrl, function (error, response, body) {
+      if (error) throw new Error(error);
+      body = JSON.parse(body);
+      if (body.metadata.total <= 0 ){
+        price = null;
+        res.json("No results");
+        return;
+      }
+      state = body.results[0]["school.state"];
+      zip = body.results[0]["school.zip"];
+      city = body.results[0]["school.city"];
+
+      finished();
     });
 
-    let avgRating = ratings.reduce(function(a, b) { return a + b; }, 0) / ratings.length;
-    let avgDollars = Math.floor(dollars.reduce(function(a, b) { return a + b; }, 0) / dollars.length);
-    
-    res.json({"rating": avgRating, "dollars": avgDollars});
-  }
+    function getYelp(){
+       client.search({
+          location: state + " " + city + " " + zip
+        }).then(response => {
+          parseData(response.jsonBody);
+        }).catch(e => {
+          console.log(e);
+        });
+    }
 
-});
+    function parseData(data){
+      /**
+      *@param: (Json Object) 
+      **/
+      let dollars = [];
+      let ratings = [];
+      data = data["businesses"];
+
+      data.forEach(function(item,index,array){
+          ratings.push(item.rating);
+          dollars.push(item.price.length);
+
+      });
+
+      let avgRating = ratings.reduce(function(a, b) { return a + b; }, 0) / ratings.length;
+      let avgDollars = Math.floor(dollars.reduce(function(a, b) { return a + b; }, 0) / dollars.length);
+      let response = {"rating": avgRating, "dollars": avgDollars};
+
+      let cacheSave = new cache({
+        endpoint:"/location",
+        response: response,
+        lastUsed: new Date(),
+        args:{"uniName": uniName}
+    });
+       cacheSave.save(function (err, fluffy) {
+      if (err) return console.error(err);
+        
+      });
+      res.json(response);
+    }
+ }
+});//end of location endpoint
 
 app.get('/info/:uniName', function(req, res){
   let uniName = req.params.uniName;
