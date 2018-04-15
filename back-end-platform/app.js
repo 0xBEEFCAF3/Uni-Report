@@ -74,6 +74,7 @@ app.get('/location/:uniName', function(req, res){
           callAPI();//just call the api
           return;
         }
+        console.log("from the cache");
         res.json(cacheResponse);//send json'd cache object. 
     
     }, function(err) {
@@ -138,10 +139,10 @@ app.get('/location/:uniName', function(req, res){
         response: response,
         lastUsed: new Date(),
         args:{"uniName": uniName}
-    });
-       cacheSave.save(function (err, fluffy) {
-      if (err) return console.error(err);
-        
+      });
+      cacheSave.save(function (err) {
+        if (err) return console.error(err);
+          
       });
       res.json(response);
     }
@@ -150,145 +151,334 @@ app.get('/location/:uniName', function(req, res){
 
 app.get('/info/:uniName', function(req, res){
   let uniName = req.params.uniName;
-  var finished = _.after(1, respond);
-  let infoUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+
-  "&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,school.state,school.zip,school.city,school.school_url";
+  
 
-  let state;
-  let zip;
-  let city;
-  let website;
-
-
-  request(infoUrl, function (error, response, body) {
-    if (error) throw new Error(error);
-    body = JSON.parse(body);
-    if (body.metadata.total <= 0 ){
-      price = null;
-      res.json("No results");
-      return;
-    }
-    state = body.results[0]["school.state"];
-    zip = body.results[0]["school.zip"];
-    city = body.results[0]["school.city"];
-    school_url = body.results[0]["school.school_url"];
-
-    finished();
+  //fist check cache
+  cacheModel.checkCache("/info", {uniName:uniName}).then(function(result) {
+        cacheResponse = result;
+        if(Object.keys(cacheResponse).length === 0 && cacheResponse.constructor === Object){
+          //case if api call is not in cache
+          callAPI();//just call the api
+          return;
+        }
+        console.log("from the cache");
+        res.json(cacheResponse);//send json'd cache object. 
+    
+    }, function(err) {
+        console.log(err);
   });
 
-  function respond(){
-    res.json({"state": state,"zip": zip,"city":city,"school_url":school_url,"title":"Location and school website"});
-  }
 
+  function callAPI(){
+    var finished = _.after(1, respond);
+    let infoUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+
+    "&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,school.state,school.zip,school.city,school.school_url";
+
+    let state;
+    let zip;
+    let city;
+    let website;
+
+
+    request(infoUrl, function (error, response, body) {
+      if (error) throw new Error(error);
+      body = JSON.parse(body);
+      if (body.metadata.total <= 0 ){
+        price = null;
+        res.json("No results");
+        return;
+      }
+      state = body.results[0]["school.state"];
+      zip = body.results[0]["school.zip"];
+      city = body.results[0]["school.city"];
+      school_url = body.results[0]["school.school_url"];
+
+      finished();
+    });
+
+    function respond(){
+      let response = {"state": state,"zip": zip,"city":city,"school_url":school_url,"title":"Location and school website"};
+      let cacheSave = new cache({
+        endpoint:"/info",
+        response: response,
+        lastUsed: new Date(),
+        args:{"uniName": uniName}
+      });
+      cacheSave.save(function (err) {
+        if (err) return console.error(err);
+          
+      });
+      res.json(response);
+    }
+  }
 });
 
 app.get('/price/:uniName', function(req, res){
   let uniName = req.params.uniName;
-  var finished = _.after(1, respond);
-  let priceUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.price_calculator_url";
-  //school.price_calculator_url
-  let price;
 
-  request(priceUrl, function (error, response, body) {
-    if (error) throw new Error(error);
-    body = JSON.parse(body);
-    if (body.metadata.total <= 0 ){
-      price = null;
-      res.json("No results");
-      return;
-    }
-    price = body.results[0]["school.price_calculator_url"];
-    finished();
+  //fist check cache
+  cacheModel.checkCache("/price", {uniName:uniName}).then(function(result) {
+        cacheResponse = result;
+        if(Object.keys(cacheResponse).length === 0 && cacheResponse.constructor === Object){
+          //case if api call is not in cache
+          callAPI();//just call the api
+          return;
+        }
+        console.log("from the cache");
+        res.json(cacheResponse);//send json'd cache object. 
+    
+    }, function(err) {
+        console.log(err);
   });
 
-  function respond(){
-    res.json({"price": price, "title":"School price calculator"});
-  }
+  function callAPI(){  
+    var finished = _.after(1, respond);
+    let priceUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.price_calculator_url";
+    //school.price_calculator_url
+    let price;
 
+    request(priceUrl, function (error, response, body) {
+      if (error) throw new Error(error);
+      body = JSON.parse(body);
+      if (body.metadata.total <= 0 ){
+        price = null;
+        res.json("No results");
+        return;
+      }
+      price = body.results[0]["school.price_calculator_url"];
+      finished();
+    });
+
+    function respond(){
+      let response = {"price": price, "title":"School price calculator"};
+      let cacheSave = new cache({
+        endpoint:"/price",
+        response: response,
+        lastUsed: new Date(),
+        args:{"uniName": uniName}
+      });
+      cacheSave.save(function (err) {
+        if (err) return console.error(err);
+          
+      });
+      res.json(response);
+    }
+  }
 });
 
 
 app.get('/earnings/gender/:uniName', function(req, res){
   let uniName = req.params.uniName;
-  uniName = uniName.replace("+", "%20");
-  var finished = _.after(2, respond);
-
-  let femaleUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.female_students"
-  let maleUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.male_students"
-  
-  let female;
-  let mean;
-
-  request(femaleUrl, function (error, response, body) {
-    if (error) throw new Error(error);
-    body = JSON.parse(body);
-    if (body.metadata.total <= 0 ){
-      female = null;
-      res.json("No results");
-      return;
-    }
-    female = body.results[0]["2013.earnings.10_yrs_after_entry.female_students"];
-    finished();
+  //fist check cache
+  cacheModel.checkCache("/earnings/gender", {uniName:uniName}).then(function(result) {
+        cacheResponse = result;
+        if(Object.keys(cacheResponse).length === 0 && cacheResponse.constructor === Object){
+          //case if api call is not in cache
+          callAPI();//just call the api
+          return;
+        }
+        console.log("from the cache");
+        res.json(cacheResponse);//send json'd cache object. 
+    
+    }, function(err) {
+        console.log(err);
   });
 
-  request(maleUrl, function (error, response, body) {
-    if (error) throw new Error(error);
-    body = JSON.parse(body);
-    if (body.metadata.total <= 0 ){
-      male = null;
-      res.json("No results");
-      return;
-    }
-    male = body.results[0]["2013.earnings.10_yrs_after_entry.male_students"];
-    finished();
-  });
 
-  function respond(){
-    res.json({"females":female, "males": male, "title":"Male and females entry ratio"});
+  function callAPI(){
+    uniNameUrl = uniName.replace("+", "%20");
+    var finished = _.after(2, respond);
+
+    let femaleUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniNameUrl+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.female_students"
+    let maleUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniNameUrl+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.male_students"
+    
+    let female;
+    let mean;
+
+    request(femaleUrl, function (error, response, body) {
+      if (error) throw new Error(error);
+      body = JSON.parse(body);
+      if (body.metadata.total <= 0 ){
+        female = null;
+        res.json("No results");
+        return;
+      }
+      female = body.results[0]["2013.earnings.10_yrs_after_entry.female_students"];
+      finished();
+    });
+
+    request(maleUrl, function (error, response, body) {
+      if (error) throw new Error(error);
+      body = JSON.parse(body);
+      if (body.metadata.total <= 0 ){
+        male = null;
+        res.json("No results");
+        return;
+      }
+      male = body.results[0]["2013.earnings.10_yrs_after_entry.male_students"];
+      finished();
+    });
+
+    function respond(){
+      let response = {"females":female, "males": male, "title":"Male and females entry ratio"};
+      let cacheSave = new cache({
+        endpoint:"/earnings/gender",
+        response: response,
+        lastUsed: new Date(),
+        args:{"uniName": uniName}
+      });
+      cacheSave.save(function (err) {
+        if (err) return console.error(err);
+          
+      });
+      res.json(response);
+    }
+
   }
 });
 
 
 app.get('/earnings/avg/:uniName', function(req, res){
   let uniName = req.params.uniName;
-  uniName = uniName.replace("+", "%20");
-  var finished = _.after(2, respond);
 
-  let urlMean = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.working_not_enrolled.mean_earnings"
-  let urlMedian = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.median"
-  
-  let median;
-  let mean;
-
-  request(urlMedian, function (error, response, body) {
-    if (error) throw new Error(error);
-    body = JSON.parse(body);
-    if (body.metadata.total <= 0 ){
-      median = null;
-      res.json("No results");
-      return;
-    }
-    median = body.results[0]["2013.earnings.10_yrs_after_entry.median"];
-    finished();
-  });
-
-  request(urlMean, function (error, response, body) {
-    if (error) throw new Error(error);
-    body = JSON.parse(body);
-    if (body.metadata.total <= 0 ){
-      mean = null;
-      res.json("No results");
-      return;
-    }
-    mean = body.results[0]["2013.earnings.10_yrs_after_entry.working_not_enrolled.mean_earnings"];
-    finished();
+  //fist check cache
+  cacheModel.checkCache("/earnings/avg", {uniName:uniName}).then(function(result) {
+        cacheResponse = result;
+        if(Object.keys(cacheResponse).length === 0 && cacheResponse.constructor === Object){
+          //case if api call is not in cache
+          console.log(cacheResponse);
+          callAPI();//just call the api
+          return;
+        }
+        console.log("from the cache");
+        res.json(cacheResponse);//send json'd cache object. 
     
+    }, function(err) {
+        console.log(err);
   });
 
-  function respond(){
-    res.json({"mean":mean, "median": median, "title":"Median/Mean earnings 10 years after entry"});
-  }
 
+  function callAPI(){
+    uniNameUrl = uniName.replace("+", "%20");
+    var finished = _.after(2, respond);
+
+    let urlMean = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniNameUrl+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.working_not_enrolled.mean_earnings"
+    let urlMedian = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniNameUrl+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.median"
+    
+    let median;
+    let mean;
+
+    request(urlMedian, function (error, response, body) {
+      if (error) throw new Error(error);
+      body = JSON.parse(body);
+      if (body.metadata.total <= 0 ){
+        median = null;
+        res.json("No results");
+        return;
+      }
+      median = body.results[0]["2013.earnings.10_yrs_after_entry.median"];
+      finished();
+    });
+
+    request(urlMean, function (error, response, body) {
+      if (error) throw new Error(error);
+      body = JSON.parse(body);
+      if (body.metadata.total <= 0 ){
+        mean = null;
+        res.json("No results");
+        return;
+      }
+      mean = body.results[0]["2013.earnings.10_yrs_after_entry.working_not_enrolled.mean_earnings"];
+      finished();
+      
+    });
+
+    function respond(){
+      let response = {"mean":mean, "median": median, "title":"Median/Mean earnings 10 years after entry"};
+      let cacheSave = new cache({
+        endpoint:"/earnings/avg",
+        response: response,
+        lastUsed: new Date(),
+        args:{"uniName": uniName}
+      });
+      cacheSave.save(function (err) {
+        if (err) return console.error(err);
+          
+      });
+
+      res.json(response);
+    }
+  }
+});
+
+app.get('/rmp/:uniName', function(req, res){
+  let uniName = req.params.uniName;
+
+  //fist check cache
+  cacheModel.checkCache("/rmp", {uniName:uniName}).then(function(result) {
+        cacheResponse = result;
+        if(Object.keys(cacheResponse).length === 0 && cacheResponse.constructor === Object){
+          //case if api call is not in cache
+          console.log(cacheResponse);
+          callAPI();//just call the api
+          return;
+        }
+        console.log("from the cache");
+        res.json(cacheResponse);//send json'd cache object. 
+    
+    }, function(err) {
+        console.log(err);
+  });
+
+  function callAPI(){
+    let url = 'http://www.ratemyprofessors.com/search.jsp?query='+ uniName;
+    let sid;
+
+    request(url, function(error, response, html){
+        if(!error){
+            var $ = cheerio.load(html);
+            let sid = $('div.listings-wrap ul.listings li.SCHOOL a').attr("href");
+        if(sid == undefined || sid == null){
+          res.send("Incorrect Response");
+          return;
+        }
+        sid = sid.split("?")[1];
+            
+            let ratingURL =  "http://www.ratemyprofessors.com/campusRatings.jsp?" + sid;
+            console.log("the rating url and sid");
+            console.log(ratingURL, sid);
+            request(ratingURL, function(error, response, html){
+              if(!error){
+                  var $ = cheerio.load(html);
+              let ratings = {};
+              $(".school-averages div.rating").each(function(index){
+                  if(index > 7)
+                    return;
+                  let rating = $(this).children()[1];
+                  let cat =  $(this).children()[2];
+                  ratings[$(cat).text()] = $(rating).text();
+              });
+              //save in cache
+              let response = ratings;
+              let cacheSave = new cache({
+                endpoint:"/rmp",
+                response: response,
+                lastUsed: new Date(),
+                args:{"uniName": uniName}
+              });
+              cacheSave.save(function (err) {
+                if (err) return console.error(err);
+                  
+              });
+              res.json(ratings);
+              }
+            });
+        }
+
+      });//first request
+
+  //end of the rmp route
+  }
 });
 
 
@@ -301,61 +491,6 @@ app.get('/schoolreport/:uniName', function(req, res) {
     });
 });
 
-app.get('/rmp/:uniName', function(req, res){
-
-
-  let uniName = req.params.uniName;
-  let url = 'http://www.ratemyprofessors.com/search.jsp?query='+ uniName;
-  let sid;
-
-  request(url, function(error, response, html){
-      if(!error){
-          var $ = cheerio.load(html);
-
-      let sid = $('div.listings-wrap ul.listings li.SCHOOL a').attr("href");
-
-      if(sid == undefined || sid == null){
-        res.send("Incorrect Response");
-        return;
-      }
-
-      sid = sid.split("?")[1];
-      
-      //request to get info
-          //URL EXAMPLE http://www.ratemyprofessors.com/campusRatings.jsp?sid=1280
-          
-          let ratingURL =  "http://www.ratemyprofessors.com/campusRatings.jsp?" + sid;
-          console.log("the rating url and sid");
-          console.log(ratingURL, sid);
-          request(ratingURL, function(error, response, html){
-            if(!error){
-                var $ = cheerio.load(html);
-
-            let ratings = {};
-            $(".school-averages div.rating").each(function(index){
-                if(index > 7)
-                  return;
-                let rating = $(this).children()[1];
-                let cat =  $(this).children()[2];
-                ratings[$(cat).text()] = $(rating).text();
-                //console.log($(rating).text(), $(cat).text());
-
-            });
-            
-            console.log(ratings);
-            res.json(ratings);
-
-            }
-
-          });
-
-      }
-
-    });//first request
-
-//end of the rmp route
-
-})
 
 app.listen(8080, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
