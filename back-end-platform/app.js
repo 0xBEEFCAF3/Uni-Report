@@ -559,7 +559,9 @@ app.get('/rmp/:uniName', function(req, res){
     request(url, function(error, response, html){
         if(!error){
             var $ = cheerio.load(html);
-            let sid = $('div.listings-wrap ul.listings li.SCHOOL a').attr("href");
+
+        let sid = $('div.listings-wrap ul.listings li.SCHOOL a').attr("href");
+
         if(sid == undefined || sid == null){
           res.send("Incorrect Response");
           return;
@@ -592,9 +594,13 @@ app.get('/rmp/:uniName', function(req, res){
                 if (err) return console.error(err);
 
               });
+              
               res.json(ratings);
+
               }
+
             });
+
         }
 
       });//first request
