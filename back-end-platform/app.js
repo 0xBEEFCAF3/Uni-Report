@@ -16,7 +16,7 @@ const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const apiKey = "goaICLvtD-bg3_zKg3e8nxfLrjHSjzQajtq23nupPs6-GKLGHIoQ1ZoitB-FT_SjBUrdlLUdhJX-gJlViIx_x575xjwmmYWDHG-BMwYPwzdolNP7xUR_HS0HjsvKWnYx";
 const client = yelp.client(apiKey);
-var cacheModel = require("./models/cache.js"); 
+var cacheModel = require("./models/cache.js");
 
 var app = module.exports = express.createServer();
 
@@ -63,6 +63,128 @@ app.get('/displayCache', function(req, res){
 });
 
 
+app.get('/sat/:uniName', function(req, res){
+  let uniName = req.params.uniName;
+
+  //fist check cache
+  cacheModel.checkCache("/sat", {uniName:uniName}).then(function(result) {
+        cacheResponse = result;
+        if(Object.keys(cacheResponse).length === 0 && cacheResponse.constructor === Object){
+          //case if api call is not in cache
+          callAPI();//just call the api
+          return;
+        }
+        console.log("from the cache");
+        res.json(cacheResponse);//send json'd cache object.
+
+    }, function(err) {
+        console.log(err);
+  });
+
+
+  function callAPI(){
+    var finished = _.after(1, respond);
+    let satUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+csbApiKey+
+    "&_fields=school.name,2015.admissions.sat_scores.midpoint.critical_reading,2015.admissions.sat_scores.midpoint.math,2015.admissions.sat_scores.midpoint.writing";
+
+    let reading;
+    let math;
+    let writing;
+
+
+    request(satUrl, function (error, response, body) {
+      if (error) throw new Error(error);
+      body = JSON.parse(body);
+      if (body.metadata.total <= 0 ){
+        //reading = null;
+        res.json("No results");
+        return;
+      }
+      reading = body.results[0]["2015.admissions.sat_scores.midpoint.critical_reading"];
+      math = body.results[0]["2015.admissions.sat_scores.midpoint.math"];
+      writing = body.results[0]["2015.admissions.sat_scores.midpoint.writing"];
+
+      finished();
+    });
+
+    function respond(){
+      let response = {"SAT Reading": reading,"SAT Math": math,"SAT Writing":writing,"title":"Average SAT Score"};
+      let cacheSave = new cache({
+        endpoint:"/sat",
+        response: response,
+        lastUsed: new Date(),
+        args:{"uniName": uniName}
+      });
+      cacheSave.save(function (err) {
+        if (err) return console.error(err);
+
+      });
+      res.json(response);
+    }
+  }
+});   //end of SAT endpoint
+
+app.get('/act/:uniName', function(req, res){
+  let uniName = req.params.uniName;
+
+  //fist check cache
+  cacheModel.checkCache("/act", {uniName:uniName}).then(function(result) {
+        cacheResponse = result;
+        if(Object.keys(cacheResponse).length === 0 && cacheResponse.constructor === Object){
+          //case if api call is not in cache
+          callAPI();//just call the api
+          return;
+        }
+        console.log("from the cache");
+        res.json(cacheResponse);//send json'd cache object.
+
+    }, function(err) {
+        console.log(err);
+  });
+
+
+  function callAPI(){
+    var finished = _.after(1, respond);
+    let actUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+csbApiKey+
+    "&_fields=school.name,2015.admissions.act_scores.midpoint.english,2015.admissions.act_scores.midpoint.math,2015.admissions.act_scores.midpoint.writing";
+
+    let english;
+    let math;
+    let writing;
+
+    request(actUrl, function (error, response, body) {
+      if (error) throw new Error(error);
+      body = JSON.parse(body);
+      if (body.metadata.total <= 0){
+        //eng = null;
+        res.json("No results");
+        return;
+      }
+      english = body.results[0]["2015.admissions.act_scores.midpoint.english"];
+      math = body.results[0]["2015.admissions.act_scores.midpoint.math"];
+      writing = body.results[0]["2015.admissions.act_scores.midpoint.writing"];
+
+      finished();
+    });
+
+    function respond(){
+      let response = {"ACT English": english, "ACT Math": math, "ACT Writing":writing, "title":"Average ACT Score"};
+      let cacheSave = new cache({
+        endpoint:"/act",
+        response: response,
+        lastUsed: new Date(),
+        args:{"uniName": uniName}
+      });
+      cacheSave.save(function (err) {
+        if (err) return console.error(err);
+
+      });
+      res.json(response);
+    }
+  }
+});   //end of ACT endpoint
+
+
 app.get('/location/:uniName', function(req, res){
   let uniName = req.params.uniName;
   let cacheResponse = null;
@@ -75,8 +197,8 @@ app.get('/location/:uniName', function(req, res){
           return;
         }
         console.log("from the cache");
-        res.json(cacheResponse);//send json'd cache object. 
-    
+        res.json(cacheResponse);//send json'd cache object.
+
     }, function(err) {
         console.log(err);
   });
@@ -118,7 +240,7 @@ app.get('/location/:uniName', function(req, res){
 
     function parseData(data){
       /**
-      *@param: (Json Object) 
+      *@param: (Json Object)
       **/
       let dollars = [];
       let ratings = [];
@@ -142,7 +264,7 @@ app.get('/location/:uniName', function(req, res){
       });
       cacheSave.save(function (err) {
         if (err) return console.error(err);
-          
+
       });
       res.json(response);
     }
@@ -151,7 +273,7 @@ app.get('/location/:uniName', function(req, res){
 
 app.get('/info/:uniName', function(req, res){
   let uniName = req.params.uniName;
-  
+
 
   //fist check cache
   cacheModel.checkCache("/info", {uniName:uniName}).then(function(result) {
@@ -162,8 +284,8 @@ app.get('/info/:uniName', function(req, res){
           return;
         }
         console.log("from the cache");
-        res.json(cacheResponse);//send json'd cache object. 
-    
+        res.json(cacheResponse);//send json'd cache object.
+
     }, function(err) {
         console.log(err);
   });
@@ -206,7 +328,7 @@ app.get('/info/:uniName', function(req, res){
       });
       cacheSave.save(function (err) {
         if (err) return console.error(err);
-          
+
       });
       res.json(response);
     }
@@ -225,13 +347,13 @@ app.get('/price/:uniName', function(req, res){
           return;
         }
         console.log("from the cache");
-        res.json(cacheResponse);//send json'd cache object. 
-    
+        res.json(cacheResponse);//send json'd cache object.
+
     }, function(err) {
         console.log(err);
   });
 
-  function callAPI(){  
+  function callAPI(){
     var finished = _.after(1, respond);
     let priceUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniName+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.price_calculator_url";
     //school.price_calculator_url
@@ -259,7 +381,7 @@ app.get('/price/:uniName', function(req, res){
       });
       cacheSave.save(function (err) {
         if (err) return console.error(err);
-          
+
       });
       res.json(response);
     }
@@ -278,8 +400,8 @@ app.get('/earnings/gender/:uniName', function(req, res){
           return;
         }
         console.log("from the cache");
-        res.json(cacheResponse);//send json'd cache object. 
-    
+        res.json(cacheResponse);//send json'd cache object.
+
     }, function(err) {
         console.log(err);
   });
@@ -291,7 +413,7 @@ app.get('/earnings/gender/:uniName', function(req, res){
 
     let femaleUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniNameUrl+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.female_students"
     let maleUrl = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniNameUrl+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.male_students"
-    
+
     let female;
     let mean;
 
@@ -329,7 +451,7 @@ app.get('/earnings/gender/:uniName', function(req, res){
       });
       cacheSave.save(function (err) {
         if (err) return console.error(err);
-          
+
       });
       res.json(response);
     }
@@ -351,8 +473,8 @@ app.get('/earnings/avg/:uniName', function(req, res){
           return;
         }
         console.log("from the cache");
-        res.json(cacheResponse);//send json'd cache object. 
-    
+        res.json(cacheResponse);//send json'd cache object.
+
     }, function(err) {
         console.log(err);
   });
@@ -364,7 +486,7 @@ app.get('/earnings/avg/:uniName', function(req, res){
 
     let urlMean = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniNameUrl+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.working_not_enrolled.mean_earnings"
     let urlMedian = "https://api.data.gov/ed/collegescorecard/v1/schools?school.name="+uniNameUrl+"&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK&fields=school.name,id,2013.earnings.10_yrs_after_entry.median"
-    
+
     let median;
     let mean;
 
@@ -390,7 +512,7 @@ app.get('/earnings/avg/:uniName', function(req, res){
       }
       mean = body.results[0]["2013.earnings.10_yrs_after_entry.working_not_enrolled.mean_earnings"];
       finished();
-      
+
     });
 
     function respond(){
@@ -403,7 +525,7 @@ app.get('/earnings/avg/:uniName', function(req, res){
       });
       cacheSave.save(function (err) {
         if (err) return console.error(err);
-          
+
       });
 
       res.json(response);
@@ -424,8 +546,8 @@ app.get('/rmp/:uniName', function(req, res){
           return;
         }
         console.log("from the cache");
-        res.json(cacheResponse);//send json'd cache object. 
-    
+        res.json(cacheResponse);//send json'd cache object.
+
     }, function(err) {
         console.log(err);
   });
@@ -445,10 +567,7 @@ app.get('/rmp/:uniName', function(req, res){
           return;
         }
         sid = sid.split("?")[1];
-        
-        //request to get info
-            //URL EXAMPLE http://www.ratemyprofessors.com/campusRatings.jsp?sid=1280
-            
+
             let ratingURL =  "http://www.ratemyprofessors.com/campusRatings.jsp?" + sid;
             console.log("the rating url and sid");
             console.log(ratingURL, sid);
@@ -473,7 +592,7 @@ app.get('/rmp/:uniName', function(req, res){
               });
               cacheSave.save(function (err) {
                 if (err) return console.error(err);
-                  
+
               });
               
               res.json(ratings);
@@ -496,7 +615,7 @@ app.get('/schoolreport/:uniName', function(req, res) {
     res.render('school-report', {
         uniName:String(uniName.replace("+", " ")),
         uniNameApiString:String(uniName)
-        
+
     });
 });
 
