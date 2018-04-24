@@ -4,12 +4,9 @@
  */
 
 var express = require('express')
-  , routes = require('./routes');
-
 var request = require('request');
 var cheerio = require('cheerio');
 var _ = require('lodash');
-//const fetch = require("node-fetch");
 const yelp = require('yelp-fusion');
 const mongoose = require('mongoose');
 const MongoClient = require('mongodb').MongoClient;
@@ -17,9 +14,9 @@ const assert = require('assert');
 const yelpApiKey = "goaICLvtD-bg3_zKg3e8nxfLrjHSjzQajtq23nupPs6-GKLGHIoQ1ZoitB-FT_SjBUrdlLUdhJX-gJlViIx_x575xjwmmYWDHG-BMwYPwzdolNP7xUR_HS0HjsvKWnYx";
 const client = yelp.client(yelpApiKey);
 var cacheModel = require("./models/cache.js");
+var userModel = require("./models/user.js");
 var oauth = require('oauth');
 var authConfig = require('./auth/auth.js');
-//const GooglePlusTokenStrategy = require('google-plus-token');
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session')
@@ -44,6 +41,7 @@ function extractProfile (profile) {
     image: imageUrl
   };
 }
+
 passport.use(new GoogleStrategy({
   clientID: authConfig.client_id,
   clientSecret: authConfig.client_pass,
@@ -55,7 +53,32 @@ passport.use(new GoogleStrategy({
   cb(null, extractProfile(profile));
 }));
 
+function addUser(user){
+  /**
+  *@details: Check if user already exists if then add to session state
+            if they dont create a new user
+  **/
+
+  let name = user.name;
+  let email = "";
+  let id = user.id;
+  userModel.userExists(id).then(function(result) {
+        if(result == null || result == undefined){
+          userModel.createUser(id, name, email);
+        }else if(Object.keys(result).length === 0 && result.constructor === Object){
+          userModel.createUser(id, name, email);
+        }
+        console.log(result);//send json'd cache object.
+
+    }, function(err) {
+        console.log(err);
+  });
+}
+  
 passport.serializeUser((user, cb) => {
+  console.log(user);
+  //add user to model 
+  addUser(user);
   cb(null, user);
 });
 passport.deserializeUser((obj, cb) => {
@@ -95,6 +118,8 @@ app.configure('production', function(){
 const MongoUrl = 'mongodb://admin:admin@ds119718.mlab.com:19718/uni-report';
 let con = mongoose.connect(MongoUrl);
 let cache = mongoose.model('cache');
+let user = mongoose.model('user');
+
 app.get(
   // Login url
   '/auth/login',
@@ -112,14 +137,11 @@ app.get(
   passport.authenticate('google', { scope: ['email', 'profile'] })
 );
 
-
-
 // auth callback
 app.get(
   // OAuth 2 callback url. Use this url to configure your OAuth client in the
   // Google Developers console
   '/auth/callback',
-
   // Finish OAuth 2 flow using Passport.js
   passport.authenticate('google'),
 
@@ -133,16 +155,19 @@ app.get(
 
 // Routes
 app.get('/', function(req, res){
-  res.json("route");
+  res.json("hi");
 });
 
 app.get('/displayCache', function(req, res){
   cache.find(function(err, cache) {
     res.send(cache);
   });
-
 });
-
+app.get('/displayUsers', function(req, res){
+  user.find(function(err, users) {
+    res.send(users);
+  });
+});
 
 app.get('/sat/:uniName', function(req, res){
   let uniName = req.params.uniName;
