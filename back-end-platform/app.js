@@ -76,7 +76,7 @@ function addUser(user){
 }
   
 passport.serializeUser((user, cb) => {
-  console.log(user);
+  console.log(cb);
   //add user to model 
   addUser(user);
   cb(null, user);
@@ -155,7 +155,7 @@ app.get(
 
 // Routes
 app.get('/', function(req, res){
-  res.json("hi");
+  res.json(req.session);
 });
 
 app.get('/displayCache', function(req, res){
