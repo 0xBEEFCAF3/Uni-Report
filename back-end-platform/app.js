@@ -155,6 +155,12 @@ app.get(
 
 // Routes
 app.get('/', function(req, res){
+  if(req.session.passport){
+    console.log("user is logged in");
+  }else{
+    res.redirect("/auth/login");
+    return;
+  }
   res.json(req.session);
 });
 
@@ -167,6 +173,26 @@ app.get('/displayUsers', function(req, res){
   user.find(function(err, users) {
     res.send(users);
   });
+});
+
+app.get('/profile', function(req, res){
+  if(req.session.passport){
+    console.log("user is logged in");
+  }else{
+    res.redirect("/auth/login");
+    return;
+  }
+
+ 
+  
+  let name = req.session.passport.user.displayName;
+  let imageUrl = req.session.passport.user.image;
+
+  res.render('profile', {
+        name:name,
+        imageUrl:imageUrl
+
+    });
 });
 
 app.get('/sat/:uniName', function(req, res){
