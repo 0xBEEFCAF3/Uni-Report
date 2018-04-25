@@ -146,7 +146,48 @@ var Bundle = class Bundle {
     return likeComp;
 }
 
+createGetLikesComp(){
+    var getLikesComp = class getLikesComp extends React.Component{
 
+      constructor(){
+        super();
+        this.state = {};
+      }
+      fetchLikedUnis(){
+        let uri = "http://localhost:8080/getLikedUnis"; //have to use something else not localhost
+        let temp;
+        let _this = this;
+        var result = fetch(uri).then(response =>{
+          temp = response.json();
+          return temp;
+        }).then(function(data){
+          //console.log(data);
+          _this.setState((prevState, props) => {
+            return {likeUnis:data};
+          });
+        });       
+      }
+
+      componentWillMount(){
+        this.fetchLikedUnis();
+      }
+      render(){
+        if(this.state.likeUnis){
+          let unis = [];
+          this.state.likeUnis.forEach(function(uni){
+              let temp = React.createElement('p', null, uni);
+              unis.push(temp);
+          });           
+          const container = React.createElement('div', {}, [unis]);
+          return container;
+        }else{
+          return React.createElement('div', null, "loading..." + '!');
+        }
+
+      }
+  }
+    return getLikesComp;
+}
   
 
   /*******************
@@ -155,7 +196,6 @@ var Bundle = class Bundle {
 
   rmpHelper(schoolName){
   	let RMPComp = this.createRMPComp(schoolName);
-
   	ReactDOM.render(
                     React.createElement(RMPComp, {}),
                     document.getElementById('rmp')
@@ -168,7 +208,6 @@ var Bundle = class Bundle {
                     React.createElement(searchComp, {}),
                     document.getElementById('nav-search')
     );
-
   }
 
   likeUniHelper(schoolName){
@@ -176,6 +215,14 @@ var Bundle = class Bundle {
     ReactDOM.render(
                     React.createElement(likeComp, {}),
                     document.getElementById('like-uni')
+    );
+  }
+
+  getLikesHelper(){
+    let createGetLikesComp = this.createGetLikesComp();
+    ReactDOM.render(
+                    React.createElement(createGetLikesComp, {}),
+                    document.getElementById('likes')
     );
   }
 
