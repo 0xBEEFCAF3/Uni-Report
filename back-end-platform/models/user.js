@@ -11,13 +11,33 @@ var userSchema = new schema({
 });
 
 mongoose.model('user', userSchema);
+
+function getUserLikes(id){
+	/**
+	*@param: (Int) User id from google
+	*@return: [String] Array of schools the user liked
+	**/
+	let user  = mongoose.model('user');
+	return new Promise(function(resolve, reject) {
+	  	user.findOne({id:id},function (err, userObject) {
+			  if (err) return reject(err);
+			  //console.log(userObject);
+			  if(userObject == null || userObject == {}){
+			  	resolve({});
+			  }else{
+			  	resolve(userObject.likedUnis);
+			  }
+		});
+	});
+}
+
 function updateUserLikes(id, uniName){
 	/**
 	*@param: (Int) User id from google
 	*@param: (String) University name that has been liked
 	*@return: (Bool) True if operation was done successfully 
 	**/
-	
+
 	let user  = mongoose.model('user');
 	return new Promise(function(resolve, reject) {
 	  	user.findOneAndUpdate({id:id},{$push:{likedUnis:uniName}},function (err, userObject) {
@@ -63,4 +83,4 @@ function createUser(id, name, email){
 }
 
 
-module.exports = {userExists : userExists, createUser: createUser, updateUserLikes:updateUserLikes};
+module.exports = {userExists : userExists, createUser: createUser, updateUserLikes:updateUserLikes, getUserLikes:getUserLikes};
