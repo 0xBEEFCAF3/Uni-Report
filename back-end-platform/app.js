@@ -193,16 +193,18 @@ app.get('/profile', function(req, res){
     });
 });
 
-app.post('updateLikes', function(req, res){
+app.post('/updateLikes', function(req, res){  
+  console.log(req.body);
   let uniName =  req.body.uniName;
-  let userId = req.session.passport.user.id;
+  //let userId = req.session.passport.user.id;
+  let userId = 102882686044984762722;
   if(uniName == "" || uniName == undefined || uniName == null){
     res.status(400).send("Incorrect input");
+    return;
   }
-  userModel.updateUserLikes(uniName, userId).then(function(){
-    
+  userModel.updateUserLikes(userId, uniName).then(function(){
+    console.log("updated ");
   });
-
 
   res.json("test");
 });

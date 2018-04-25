@@ -31,18 +31,11 @@ var Bundle = class Bundle {
   		}
 
   		render(){
-  			console.log("in render");
 
   			if(this.state.RMPUniInfo){
 
   				let RMPData = this.state.RMPUniInfo;
   				console.log(RMPData);
-
-  				/*
-  				const uniProperty = RMPData.map((property)=>{
-  					return React.createElement('li', );
-  				});
-  				*/
 
   			const title = React.createElement('h1', {}, 'University Properties');
 				const food = React.createElement("i",{className:"fas fa-utensils",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.FOOD + "-- Food");
@@ -85,7 +78,6 @@ var Bundle = class Bundle {
   		var _this = this;
   		const input = React.createElement('input', {className:"form-control nav_input","type":"text", onChange: 
   			function(evt){
-
   			 	_this.setState({
 			      inputValue: evt.target.value
 			    });
@@ -122,6 +114,7 @@ var Bundle = class Bundle {
 
   	return searchComp;
 }
+
   createLikeComp(uniName){
     var likeComp = class likeComp extends React.Component{
 
@@ -131,23 +124,22 @@ var Bundle = class Bundle {
         this.uniName = uniName;
       }
 
-      likeClickHandler(){
-         fetch('/updateLikes', {
-             method: 'post',
-             headers: {'Content-Type':'application/json'},
-             body: {
-              "uniName": this.uniName
-           }
-        });
-      }
-
       render(){
         var _this = this;
 
         let likeIcon = React.createElement('i', {className:"fas fa-thumbs-up"} );
-        let likeButton = React.createElement('button', {className:"btn btn-large btn-success",style:{margin:"5px"},onClick:this.likeClickHandler()},"Like this University",[likeIcon]);
-        const container = React.createElement('div', {}, [likeButton]);
-        return container;
+        let likeButton = React.createElement('button', {className:"btn btn-large btn-success",style:{margin:"5px"},onClick:function (){
+        let body =  JSON.stringify({"uniName": (_this.uniName.replace("+", " "))});
+        console.log(body);
+        fetch('/updateLikes', {
+             method: 'post',
+             headers: {'Content-Type':'application/json'},
+             body: body
+        });
+        }},"Like this University",[likeIcon]);
+
+          const container = React.createElement('div', {}, [likeButton]);
+          return container;
       }
     }
 
@@ -179,8 +171,8 @@ var Bundle = class Bundle {
 
   }
 
-  likeUniHelper(){
-    let likeComp = this.createLikeComp();
+  likeUniHelper(schoolName){
+    let likeComp = this.createLikeComp(schoolName);
     ReactDOM.render(
                     React.createElement(likeComp, {}),
                     document.getElementById('like-uni')

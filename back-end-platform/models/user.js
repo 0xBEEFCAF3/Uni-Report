@@ -10,16 +10,14 @@ var userSchema = new schema({
 	likedUnis: [String]
 });
 
-
-
 mongoose.model('user', userSchema);
-
 function updateUserLikes(id, uniName){
 	/**
 	*@param: (Int) User id from google
 	*@param: (String) University name that has been liked
 	*@return: (Bool) True if operation was done successfully 
 	**/
+	
 	let user  = mongoose.model('user');
 	return new Promise(function(resolve, reject) {
 	  	user.findOneAndUpdate({id:id},{$push:{likedUnis:uniName}},function (err, userObject) {
@@ -65,4 +63,4 @@ function createUser(id, name, email){
 }
 
 
-module.exports = {userExists : userExists, createUser: createUser};
+module.exports = {userExists : userExists, createUser: createUser, updateUserLikes:updateUserLikes};
