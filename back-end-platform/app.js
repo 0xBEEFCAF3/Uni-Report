@@ -4,21 +4,86 @@
  */
 
 var express = require('express')
-  , routes = require('./routes');
-
 var request = require('request');
 var cheerio = require('cheerio');
 var _ = require('lodash');
-//const fetch = require("node-fetch");
 const yelp = require('yelp-fusion');
 const mongoose = require('mongoose');
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
-const apiKey = "goaICLvtD-bg3_zKg3e8nxfLrjHSjzQajtq23nupPs6-GKLGHIoQ1ZoitB-FT_SjBUrdlLUdhJX-gJlViIx_x575xjwmmYWDHG-BMwYPwzdolNP7xUR_HS0HjsvKWnYx";
-const client = yelp.client(apiKey);
+const yelpApiKey = "goaICLvtD-bg3_zKg3e8nxfLrjHSjzQajtq23nupPs6-GKLGHIoQ1ZoitB-FT_SjBUrdlLUdhJX-gJlViIx_x575xjwmmYWDHG-BMwYPwzdolNP7xUR_HS0HjsvKWnYx";
+const client = yelp.client(yelpApiKey);
 var cacheModel = require("./models/cache.js");
-
+var userModel = require("./models/user.js");
+var oauth = require('oauth');
+var authConfig = require('./auth/auth.js');
+const passport = require('passport')
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session')
 var app = module.exports = express.createServer();
+//oauth config
+const sessionConfig = {
+  resave: false,
+  saveUninitialized: false,
+  secret: authConfig.client_pass,
+  signed: true
+};
+
+
+function extractProfile (profile) {
+  let imageUrl = '';
+  if (profile.photos && profile.photos.length) {
+    imageUrl = profile.photos[0].value;
+  }
+  return {
+    id: profile.id,
+    displayName: profile.displayName,
+    image: imageUrl
+  };
+}
+
+passport.use(new GoogleStrategy({
+  clientID: authConfig.client_id,
+  clientSecret: authConfig.client_pass,
+  callbackURL: "http://localhost:8080/auth/callback",
+  accessType: 'offline'
+}, (accessToken, refreshToken, profile, cb) => {
+  // Extract the minimal profile information we need from the profile object
+  // provided by Google
+  cb(null, extractProfile(profile));
+}));
+
+function addUser(user){
+  /**
+  *@details: Check if user already exists if then add to session state
+            if they dont create a new user
+  **/
+
+  let name = user.name;
+  let email = "";
+  let id = user.id;
+  userModel.userExists(id).then(function(result) {
+        if(result == null || result == undefined){
+          userModel.createUser(id, name, email);
+        }else if(Object.keys(result).length === 0 && result.constructor === Object){
+          userModel.createUser(id, name, email);
+        }
+        console.log(result);//send json'd cache object.
+
+    }, function(err) {
+        console.log(err);
+  });
+}
+  
+passport.serializeUser((user, cb) => {
+  console.log(cb);
+  //add user to model 
+  addUser(user);
+  cb(null, user);
+});
+passport.deserializeUser((obj, cb) => {
+  cb(null, obj);
+});
 
 // Configuration
 
@@ -26,7 +91,11 @@ app.configure(function(){
   app.set('views', __dirname + '/views/pages');
   app.set('view engine', 'ejs');
   //app.engine('jsx', require('express-react-views').createEngine());
-
+  //Oauth specific things
+  
+  app.use(passport.initialize());
+  app.use(passport.session());
+  app.use(session(sessionConfig));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(app.router);
@@ -49,23 +118,85 @@ app.configure('production', function(){
 const MongoUrl = 'mongodb://admin:admin@ds119718.mlab.com:19718/uni-report';
 let con = mongoose.connect(MongoUrl);
 let cache = mongoose.model('cache');
+let user = mongoose.model('user');
+
+app.get(
+  // Login url
+  '/auth/login',
+
+  // Save the url of the user's current page so the app can redirect back to
+  // it after authorization
+  (req, res, next) => {
+    if (req.query.return) {
+      req.session.oauth2return = req.query.return;
+    }
+    next();
+  },
+
+  // Start OAuth 2 flow using Passport.js
+  passport.authenticate('google', { scope: ['email', 'profile'] })
+);
+
+// auth callback
+app.get(
+  // OAuth 2 callback url. Use this url to configure your OAuth client in the
+  // Google Developers console
+  '/auth/callback',
+  // Finish OAuth 2 flow using Passport.js
+  passport.authenticate('google'),
+
+  // Redirect back to the original page, if any
+  (req, res) => {
+    const redirect = req.session.oauth2return || '/';
+    delete req.session.oauth2return;
+    res.redirect(redirect);
+  }
+);
 
 // Routes
 app.get('/', function(req, res){
-  res.json("route");
+  if(req.session.passport){
+    console.log("user is logged in");
+  }else{
+    res.redirect("/auth/login");
+    return;
+  }
+  res.json(req.session);
 });
 
 app.get('/displayCache', function(req, res){
   cache.find(function(err, cache) {
     res.send(cache);
   });
-
+});
+app.get('/displayUsers', function(req, res){
+  user.find(function(err, users) {
+    res.send(users);
+  });
 });
 
+app.get('/profile', function(req, res){
+  if(req.session.passport){
+    console.log("user is logged in");
+  }else{
+    res.redirect("/auth/login");
+    return;
+  }
+
+ 
+  
+  let name = req.session.passport.user.displayName;
+  let imageUrl = req.session.passport.user.image;
+
+  res.render('profile', {
+        name:name,
+        imageUrl:imageUrl
+
+    });
+});
 
 app.get('/sat/:uniName', function(req, res){
   let uniName = req.params.uniName;
-
   //fist check cache
   cacheModel.checkCache("/sat", {uniName:uniName}).then(function(result) {
         cacheResponse = result;
