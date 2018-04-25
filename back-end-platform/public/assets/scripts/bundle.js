@@ -175,7 +175,8 @@ createGetLikesComp(){
         if(this.state.likeUnis){
           let unis = [];
           this.state.likeUnis.forEach(function(uni){
-              let temp = React.createElement('p', null, uni);
+              let link = React.createElement('a', {href:"/schoolreport/"+ uni.replace(" ", "+")}, uni);
+              let temp = React.createElement('p', null, null, [link] );
               unis.push(temp);
           });           
           const container = React.createElement('div', {}, [unis]);
