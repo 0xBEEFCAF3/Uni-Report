@@ -182,8 +182,6 @@ app.get('/profile', function(req, res){
     res.redirect("/auth/login");
     return;
   }
-
- 
   
   let name = req.session.passport.user.displayName;
   let imageUrl = req.session.passport.user.image;
@@ -194,6 +192,17 @@ app.get('/profile', function(req, res){
 
     });
 });
+
+app.post('updateLikes', function(req, res){
+  let uniName =  req.body.uniName;
+  if(uniName == "" || uniName == undefined || uniName == null){
+    res.status(400).send("Incorrect input");
+  }
+
+  
+  res.json("test");
+});
+
 
 app.get('/sat/:uniName', function(req, res){
   let uniName = req.params.uniName;
