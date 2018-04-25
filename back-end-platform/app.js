@@ -195,11 +195,15 @@ app.get('/profile', function(req, res){
 
 app.post('updateLikes', function(req, res){
   let uniName =  req.body.uniName;
+  let userId = req.session.passport.user.id;
   if(uniName == "" || uniName == undefined || uniName == null){
     res.status(400).send("Incorrect input");
   }
+  userModel.updateUserLikes(uniName, userId).then(function(){
+    
+  });
 
-  
+
   res.json("test");
 });
 

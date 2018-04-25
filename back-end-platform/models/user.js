@@ -6,12 +6,28 @@ var userSchema = new schema({
 	id: Number,
 	name: String,
 	email: String,
-	lastLog: String
+	lastLog: String,
+	likedUnis: [String]
 });
 
 
 
 mongoose.model('user', userSchema);
+
+function updateUserLikes(id, uniName){
+	/**
+	*@param: (Int) User id from google
+	*@param: (String) University name that has been liked
+	*@return: (Bool) True if operation was done successfully 
+	**/
+	let user  = mongoose.model('user');
+	return new Promise(function(resolve, reject) {
+	  	user.findOneAndUpdate({id:id},{$push:{likedUnis:uniName}},function (err, userObject) {
+			  if (err) return reject(err);
+			  else resolve(true);
+		});
+	});
+}
 
 function userExists(id){
 	/**
@@ -40,7 +56,8 @@ function createUser(id, name, email){
         id: id,
 		name: name,
 		email: email,
-		lastLog: new Date()
+		lastLog: new Date(),
+		likedUnis: []
       });
       newUser.save(function (err) {
         if (err) return console.error(err);
