@@ -9,6 +9,7 @@
 					<div class="panel panel-headline">
 						<div class="panel-heading">
 							<h1 class="panel-title"><%= uniName %></h1>
+							<div id="like-uni"> </div>
 						</div>
 						<div id="rmp" class="panel-body">
 							
@@ -170,7 +171,7 @@
 					const schoolName = "<%= uniNameApiString %>";
 
 					bundle.rmpHelper(schoolName);
-					
+					bundle.likeUniHelper(schoolName);
 				});
 
 		</script>

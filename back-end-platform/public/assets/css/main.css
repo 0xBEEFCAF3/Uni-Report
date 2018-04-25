@@ -1,7 +1,7 @@
 /*	
 *	############################################################################################
 *	
-*	Uni-Report - Free Bootstrap Dashboard Template
+*	Uni-Report 
 *	---------------------------------------------------------------------
 *	
 *	############################################################################################
@@ -639,7 +639,9 @@ fieldset[disabled] .btn {
     .panel .panel-heading button {
       padding: 0;
       margin-left: 5px;
-      background-color: transparent;
+      color:black;
+      width: 175px;
+      height: 50px;
       border: none;
       outline: none; }
       .panel .panel-heading button i {

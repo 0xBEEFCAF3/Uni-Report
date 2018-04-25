@@ -44,15 +44,15 @@ var Bundle = class Bundle {
   				});
   				*/
 
-  				const title = React.createElement('h1', {}, 'University Properties');
-				const food = React.createElement("i",{className:"fas fa-utensils",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.FOOD + "-- Food");
-				const internet = React.createElement("i",{className:"fab fa-internet-explorer",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.INTERNET + "-- Internet");
-				const reputation = React.createElement("i",{className:"fas fa-book",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.REPUTATION + "-- Reputation");
-				const clubs = React.createElement("i",{className:"fas fa-users",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.CLUBS + "-- Clubs");
-				const facilities = React.createElement("i",{className:"fas fa-building",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.FACILITIES + "-- Facilities");
-				const location = React.createElement("i",{className:"fas fa-map-marker",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.LOCATION + "-- Location");
-				const oppurtunity = React.createElement("i",{className:"fas fa-handshake",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.OPPORTUNITY + "-- Oppurtunity");
-				const social = React.createElement("i",{className:"fas fa-user",style:{"font-size":"20px","padding-right": "10px"}},": "+ RMPData.SOCIAL + "-- Social");
+  			const title = React.createElement('h1', {}, 'University Properties');
+				const food = React.createElement("i",{className:"fas fa-utensils",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.FOOD + "-- Food");
+				const internet = React.createElement("i",{className:"fab fa-internet-explorer",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.INTERNET + "-- Internet");
+				const reputation = React.createElement("i",{className:"fas fa-book",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.REPUTATION + "-- Reputation");
+				const clubs = React.createElement("i",{className:"fas fa-users",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.CLUBS + "-- Clubs");
+				const facilities = React.createElement("i",{className:"fas fa-building",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.FACILITIES + "-- Facilities");
+				const location = React.createElement("i",{className:"fas fa-map-marker",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.LOCATION + "-- Location");
+				const oppurtunity = React.createElement("i",{className:"fas fa-handshake",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.OPPORTUNITY + "-- Oppurtunity");
+				const social = React.createElement("i",{className:"fas fa-user",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.SOCIAL + "-- Social");
 				const container = React.createElement('div', {}, [title, food, internet,reputation, clubs, facilities, oppurtunity, social]);
 				
 				return container;}
@@ -122,6 +122,38 @@ var Bundle = class Bundle {
 
   	return searchComp;
 }
+  createLikeComp(uniName){
+    var likeComp = class likeComp extends React.Component{
+
+      constructor(){
+        super();
+        this.state = {};
+        this.uniName = uniName;
+      }
+
+      likeClickHandler(){
+         fetch('/updateLikes', {
+             method: 'post',
+             headers: {'Content-Type':'application/json'},
+             body: {
+              "uniName": this.uniName
+           }
+        });
+      }
+
+      render(){
+        var _this = this;
+
+        let likeIcon = React.createElement('i', {className:"fas fa-thumbs-up"} );
+        let likeButton = React.createElement('button', {className:"btn btn-large btn-success",style:{margin:"5px"},onClick:this.likeClickHandler()},"Like this University",[likeIcon]);
+        const container = React.createElement('div', {}, [likeButton]);
+        return container;
+      }
+    }
+
+    return likeComp;
+}
+
 
   
 
@@ -145,6 +177,14 @@ var Bundle = class Bundle {
                     document.getElementById('nav-search')
     );
 
+  }
+
+  likeUniHelper(){
+    let likeComp = this.createLikeComp();
+    ReactDOM.render(
+                    React.createElement(likeComp, {}),
+                    document.getElementById('like-uni')
+    );
   }
 
 
