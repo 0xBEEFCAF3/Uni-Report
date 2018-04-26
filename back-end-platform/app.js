@@ -164,6 +164,8 @@ app.get('/', function(req, res){
   res.json(req.session);
 });
 
+/*DEV functions of displaying and modifying the model*/
+/*Not to be used in any part of the app*/
 app.get('/displayCache', function(req, res){
   cache.find(function(err, cache) {
     res.send(cache);
@@ -174,6 +176,12 @@ app.get('/displayUsers', function(req, res){
     res.send(users);
   });
 });
+app.get('/deleteAllUsers', function(req, res){
+  user.remove({}, function(err) { 
+   console.log('collection removed') 
+  });
+  res.send('deleted');
+});
 
 app.get('/profile', function(req, res){
   if(req.session.passport){
@@ -182,8 +190,6 @@ app.get('/profile', function(req, res){
     res.redirect("/auth/login");
     return;
   }
-
- 
   
   let name = req.session.passport.user.displayName;
   let imageUrl = req.session.passport.user.image;
@@ -191,9 +197,32 @@ app.get('/profile', function(req, res){
   res.render('profile', {
         name:name,
         imageUrl:imageUrl
-
     });
 });
+
+app.post('/updateLikes', function(req, res){  
+  let uniName =  req.body.uniName;
+  //let userId = req.session.passport.user.id;
+  let userId = 102882686044984762722;
+  if(uniName == "" || uniName == undefined || uniName == null){
+    res.status(400).send("Incorrect input");
+    return;
+  }
+  userModel.updateUserLikes(userId, uniName).then(function(){
+    console.log("updated ");
+  });
+
+  res.json("updated");
+});
+
+// end point for getting all used liked unis
+app.get('/getLikedUnis',function(req, res){
+  let userId = 102882686044984762722;
+  userModel.getUserLikes(userId).then(function(response){
+    res.json(response);
+  });
+});
+
 
 app.get('/sat/:uniName', function(req, res){
   let uniName = req.params.uniName;

@@ -17,7 +17,7 @@
 						<div class="panel-heading">
 							<h1 class="panel-title">Universities you liked</h1>
 						</div>
-						<div class="container">
+						<div class="container" id="likes">
 							<p> </p>
 						</div>
 						
@@ -31,7 +31,12 @@
 		<!-- END MAIN -->
 		</div>
 		<script>
+		$(document).ready(function(){
+			console.log("ready to go ");
+			const bundle = new Bundle();
+			bundle.getLikesHelper();
 
+		});
 		</script>
 
 		<% include ../partials/footer %>
