@@ -37,7 +37,7 @@ var Bundle = class Bundle {
   				let RMPData = this.state.RMPUniInfo;
   				console.log(RMPData);
 
-  			const title = React.createElement('h1', {}, 'University Properties');
+  			const title = React.createElement('h1', {}, 'University Campus Properties');
 				const food = React.createElement("i",{className:"fas fa-utensils",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.FOOD + "-- Food");
 				const internet = React.createElement("i",{className:"fab fa-internet-explorer",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.INTERNET + "-- Internet");
 				const reputation = React.createElement("i",{className:"fas fa-book",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.REPUTATION + "-- Reputation");
