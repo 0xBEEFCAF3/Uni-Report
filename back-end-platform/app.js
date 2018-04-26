@@ -17,9 +17,12 @@ var cacheModel = require("./models/cache.js");
 var userModel = require("./models/user.js");
 var oauth = require('oauth');
 var authConfig = require('./auth/auth.js');
+var jwt = require('jsonwebtoken');
+//var cookieParser = require('cookie-parser');
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const session = require('express-session')
+const session = require('express-session');
+const uniqid =  require('uniqid');
 var app = module.exports = express.createServer();
 //oauth config
 const sessionConfig = {
@@ -132,7 +135,6 @@ app.get(
     }
     next();
   },
-
   // Start OAuth 2 flow using Passport.js
   passport.authenticate('google', { scope: ['email', 'profile'] })
 );
@@ -149,41 +151,59 @@ app.get(
   (req, res) => {
     const redirect = req.session.oauth2return || '/';
     delete req.session.oauth2return;
+
+    let jwtSecret = uniqid();
+    req.session.jwtSecret = jwtSecret;
+
+    const cookieOptions = {
+      httpOnly: true,
+      expires: 0 
+    }
+    const jwtPayload = {
+     googleAccessToken: jwtSecret
+    }
+
+    const authJwtToken = jwt.sign(jwtPayload, jwtSecret);
+    //res.cookie('googleAccessJwt', authJwtToken, cookieOptions);
     res.redirect(redirect);
   }
 );
+//
+function authRequired (req, res, next) {
+  if (!req.session.passport) {
+    req.session.oauth2return = req.originalUrl;
+    return res.redirect('/auth/login');
+  }
+  next();
+}
+
 
 // Routes
-app.get('/', function(req, res){
-  if(req.session.passport){
-    console.log("user is logged in");
-  }else{
-    res.redirect("/auth/login");
-    return;
-  }
+app.get('/', authRequired,function(req, res){
+
   res.json(req.session);
 });
 
 /*DEV functions of displaying and modifying the model*/
 /*Not to be used in any part of the app*/
-app.get('/displayCache', function(req, res){
+app.get('/displayCache',authRequired ,function(req, res){
   cache.find(function(err, cache) {
     res.send(cache);
   });
 });
-app.get('/displayUsers', function(req, res){
+app.get('/displayUsers',authRequired ,function(req, res){
   user.find(function(err, users) {
     res.send(users);
   });
 });
-app.get('/deleteAllUsers', function(req, res){
+app.get('/deleteAllUsers',authRequired ,function(req, res){
   user.remove({}, function(err) { 
    console.log('collection removed') 
   });
   res.send('deleted');
 });
 
-app.get('/profile', function(req, res){
+app.get('/profile',authRequired, function(req, res){
   if(req.session.passport){
     console.log("user is logged in");
   }else{
@@ -216,7 +236,7 @@ app.post('/updateLikes', function(req, res){
 });
 
 // end point for getting all used liked unis
-app.get('/getLikedUnis',function(req, res){
+app.get('/getLikedUnis' ,function(req, res){
   let userId = 102882686044984762722;
   userModel.getUserLikes(userId).then(function(response){
     res.json(response);
@@ -224,7 +244,7 @@ app.get('/getLikedUnis',function(req, res){
 });
 
 
-app.get('/sat/:uniName', function(req, res){
+app.get('/sat/:uniName' ,function(req, res){
   let uniName = req.params.uniName;
   //fist check cache
   cacheModel.checkCache("/sat", {uniName:uniName}).then(function(result) {
@@ -345,7 +365,7 @@ app.get('/act/:uniName', function(req, res){
 });   //end of ACT endpoint
 
 
-app.get('/location/:uniName', function(req, res){
+app.get('/location/:uniName' ,function(req, res){
   let uniName = req.params.uniName;
   let cacheResponse = null;
   //fist check cache
@@ -431,7 +451,7 @@ app.get('/location/:uniName', function(req, res){
  }
 });//end of location endpoint
 
-app.get('/info/:uniName', function(req, res){
+app.get('/info/:uniName' ,function(req, res){
   let uniName = req.params.uniName;
 
 
@@ -549,7 +569,7 @@ app.get('/price/:uniName', function(req, res){
 });
 
 
-app.get('/earnings/gender/:uniName', function(req, res){
+app.get('/earnings/gender/:uniName' , function(req, res){
   let uniName = req.params.uniName;
   //fist check cache
   cacheModel.checkCache("/earnings/gender", {uniName:uniName}).then(function(result) {
@@ -770,7 +790,7 @@ app.get('/rmp/:uniName', function(req, res){
 });
 
 
-app.get('/schoolreport/:uniName', function(req, res) {
+app.get('/schoolreport/:uniName',authRequired, function(req, res) {
     let uniName = req.params.uniName;
     res.render('school-report', {
         uniName:String(uniName.replace("+", " ")),
