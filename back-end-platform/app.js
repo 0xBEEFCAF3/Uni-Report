@@ -123,6 +123,16 @@ let con = mongoose.connect(MongoUrl);
 let cache = mongoose.model('cache');
 let user = mongoose.model('user');
 
+app.get('/auth/logout',function(req,res){
+    //clear and all cookies and session id and render logout page
+    //res.clearCookie("key"); ... have to first add jwts
+    delete req.session.passport;
+    delete req.session.jwtSecret;
+
+    res.render('logout');
+
+});
+
 app.get(
   // Login url
   '/auth/login',
