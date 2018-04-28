@@ -11,15 +11,19 @@ const yelp = require('yelp-fusion');
 const mongoose = require('mongoose');
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
+const csbApiKey = "&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK";
 const yelpApiKey = "goaICLvtD-bg3_zKg3e8nxfLrjHSjzQajtq23nupPs6-GKLGHIoQ1ZoitB-FT_SjBUrdlLUdhJX-gJlViIx_x575xjwmmYWDHG-BMwYPwzdolNP7xUR_HS0HjsvKWnYx";
 const client = yelp.client(yelpApiKey);
 var cacheModel = require("./models/cache.js");
 var userModel = require("./models/user.js");
 var oauth = require('oauth');
 var authConfig = require('./auth/auth.js');
+var jwt = require('jsonwebtoken');
+//var cookieParser = require('cookie-parser');
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const session = require('express-session')
+const session = require('express-session');
+const uniqid =  require('uniqid');
 var app = module.exports = express.createServer();
 //oauth config
 const sessionConfig = {
@@ -28,7 +32,6 @@ const sessionConfig = {
   secret: authConfig.client_pass,
   signed: true
 };
-
 
 function extractProfile (profile) {
   let imageUrl = '';
@@ -120,6 +123,16 @@ let con = mongoose.connect(MongoUrl);
 let cache = mongoose.model('cache');
 let user = mongoose.model('user');
 
+app.get('/auth/logout',function(req,res){
+    //clear and all cookies and session id and render logout page
+    //res.clearCookie("key"); ... have to first add jwts
+    delete req.session.passport;
+    delete req.session.jwtSecret;
+
+    res.render('logout');
+
+});
+
 app.get(
   // Login url
   '/auth/login',
@@ -132,7 +145,6 @@ app.get(
     }
     next();
   },
-
   // Start OAuth 2 flow using Passport.js
   passport.authenticate('google', { scope: ['email', 'profile'] })
 );
@@ -148,42 +160,93 @@ app.get(
   // Redirect back to the original page, if any
   (req, res) => {
     const redirect = req.session.oauth2return || '/';
+    if(redirect == "/auth/login"){
+      redirect == "/";
+    }
     delete req.session.oauth2return;
+
+    let jwtSecret = authConfig.JWT_secret;
+    req.session.jwtSecret = jwtSecret;
+    var date = new Date();
+    date.setTime(date.getTime() + (5 * 60 * 1000));// 5 hours
+
+    const cookieOptions = {
+      httpOnly: true,
+      expires: 0 
+    }
+    const jwtPayload = {
+     googleAccessToken: jwtSecret
+    }
+
+    const authJwtToken = jwt.sign(jwtPayload, jwtSecret);
+    res.cookie('googleAccessJwt', authJwtToken, cookieOptions);
+    //res.json( req.headers.cookie);
     res.redirect(redirect);
   }
 );
 
-// Routes
-app.get('/', function(req, res){
-  if(req.session.passport){
-    console.log("user is logged in");
-  }else{
-    res.redirect("/auth/login");
-    return;
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
+function authRequired (req, res, next) {
+  if (!req.session.passport) {
+    req.session.oauth2return = req.originalUrl;
+    return res.redirect('/auth/login');
   }
-  res.json(req.session);
+  next();
+}
+
+function checkJwtAuth(req, res, next){
+  
+  const userJWT = JSON.stringify(req.headers.cookie);
+  //const payload = userJWT.split('.')[2];
+  console.log(userJWT);
+  const JWT = (userJWT.split("googleAccessJwt")[1]).replace("=","").split(";")[0]; //this needed to happend
+  console.log("the JWT:::", authConfig.JWT_secret);
+  console.log("XXX end of jwt");
+    if (!userJWT) { 
+        res.send(401, 'Invalid or missing authorization token');
+    }else {
+        const userJWTPayload = jwt.verify(JWT, authConfig.JWT_secret)
+        if (!userJWTPayload) {
+            //Kill the token since it is invalid
+            //
+            res.clearCookie('googleAccessJwt');
+            res.send(401, 'Invalid or missing authorization token');
+        }else{
+          next();
+        }
+    }
+}
+
+
+// Routes
+app.get('/', authRequired,function(req, res){
+
+  res.json(req.headers.cookie);
 });
 
 /*DEV functions of displaying and modifying the model*/
 /*Not to be used in any part of the app*/
-app.get('/displayCache', function(req, res){
+app.get('/displayCache',authRequired ,function(req, res){
   cache.find(function(err, cache) {
     res.send(cache);
   });
 });
-app.get('/displayUsers', function(req, res){
+app.get('/displayUsers',authRequired ,function(req, res){
   user.find(function(err, users) {
     res.send(users);
   });
 });
-app.get('/deleteAllUsers', function(req, res){
+app.get('/deleteAllUsers',authRequired ,function(req, res){
   user.remove({}, function(err) { 
    console.log('collection removed') 
   });
   res.send('deleted');
 });
 
-app.get('/profile', function(req, res){
+app.get('/profile',authRequired, function(req, res){
   if(req.session.passport){
     console.log("user is logged in");
   }else{
@@ -216,7 +279,7 @@ app.post('/updateLikes', function(req, res){
 });
 
 // end point for getting all used liked unis
-app.get('/getLikedUnis',function(req, res){
+app.get('/getLikedUnis' ,function(req, res){
   let userId = 102882686044984762722;
   userModel.getUserLikes(userId).then(function(response){
     res.json(response);
@@ -224,7 +287,7 @@ app.get('/getLikedUnis',function(req, res){
 });
 
 
-app.get('/sat/:uniName', function(req, res){
+app.get('/sat/:uniName' ,function(req, res){
   let uniName = req.params.uniName;
   //fist check cache
   cacheModel.checkCache("/sat", {uniName:uniName}).then(function(result) {
@@ -268,7 +331,7 @@ app.get('/sat/:uniName', function(req, res){
     });
 
     function respond(){
-      let response = {"SAT Reading": reading,"SAT Math": math,"SAT Writing":writing,"title":"Average SAT Score"};
+      let response = {"SAT_Reading": reading,"SAT_Math": math,"SAT_Writing":writing,"title":"Average SAT Score"};
       let cacheSave = new cache({
         endpoint:"/sat",
         response: response,
@@ -328,7 +391,7 @@ app.get('/act/:uniName', function(req, res){
     });
 
     function respond(){
-      let response = {"ACT English": english, "ACT Math": math, "ACT Writing":writing, "title":"Average ACT Score"};
+      let response = {"ACT_English": english, "ACT_Math": math, "ACT_Writing":writing, "title":"Average ACT Score"};
       let cacheSave = new cache({
         endpoint:"/act",
         response: response,
@@ -345,7 +408,7 @@ app.get('/act/:uniName', function(req, res){
 });   //end of ACT endpoint
 
 
-app.get('/location/:uniName', function(req, res){
+app.get('/location/:uniName' ,function(req, res){
   let uniName = req.params.uniName;
   let cacheResponse = null;
   //fist check cache
@@ -431,7 +494,7 @@ app.get('/location/:uniName', function(req, res){
  }
 });//end of location endpoint
 
-app.get('/info/:uniName', function(req, res){
+app.get('/info/:uniName' ,function(req, res){
   let uniName = req.params.uniName;
 
 
@@ -549,7 +612,7 @@ app.get('/price/:uniName', function(req, res){
 });
 
 
-app.get('/earnings/gender/:uniName', function(req, res){
+app.get('/earnings/gender/:uniName' , function(req, res){
   let uniName = req.params.uniName;
   //fist check cache
   cacheModel.checkCache("/earnings/gender", {uniName:uniName}).then(function(result) {
@@ -693,9 +756,9 @@ app.get('/earnings/avg/:uniName', function(req, res){
   }
 });
 
-app.get('/rmp/:uniName', function(req, res){
+app.get('/rmp/:uniName', checkJwtAuth,function(req, res){
+  console.log("THE HEADER", req.headers.cookie);
   let uniName = req.params.uniName;
-
   //fist check cache
   cacheModel.checkCache("/rmp", {uniName:uniName}).then(function(result) {
         cacheResponse = result;
@@ -770,7 +833,7 @@ app.get('/rmp/:uniName', function(req, res){
 });
 
 
-app.get('/schoolreport/:uniName', function(req, res) {
+app.get('/schoolreport/:uniName',authRequired, function(req, res) {
     let uniName = req.params.uniName;
     res.render('school-report', {
         uniName:String(uniName.replace("+", " ")),

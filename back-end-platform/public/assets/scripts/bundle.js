@@ -15,7 +15,7 @@ var Bundle = class Bundle {
   			let uri = "http://localhost:8080/rmp/" + schoolName; //have to use something else not localhost
   			let temp;
   			let _this = this;
-  			var result = fetch(uri).then(response =>{
+  			var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
   				temp = response.json();
   				return temp;
   			}).then(function(data){
@@ -37,9 +37,9 @@ var Bundle = class Bundle {
   				let RMPData = this.state.RMPUniInfo;
   				console.log(RMPData);
 
-  			const title = React.createElement('h1', {}, 'University Properties');
+  			const title = React.createElement('h1', {}, 'University Campus Properties');
 				const food = React.createElement("i",{className:"fas fa-utensils",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.FOOD + "-- Food");
-				const internet = React.createElement("i",{className:"fab fa-internet-explorer",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.INTERNET + "-- Internet");
+				const internet = React.createElement("i",{className:"fas fa-desktop",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.INTERNET + "-- Internet");
 				const reputation = React.createElement("i",{className:"fas fa-book",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.REPUTATION + "-- Reputation");
 				const clubs = React.createElement("i",{className:"fas fa-users",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.CLUBS + "-- Clubs");
 				const facilities = React.createElement("i",{className:"fas fa-building",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.FACILITIES + "-- Facilities");
@@ -59,6 +59,84 @@ var Bundle = class Bundle {
 
   	return RMPComp;
   }
+
+  createStandTestComp(schoolName){
+    var standTestComp = class standTestComp extends React.Component{
+
+      constructor(){
+        super();
+        this.state = {};
+      }
+
+      fetchActInfo(){
+        console.log("ACT");
+        let uri = "http://localhost:8080/act/" + schoolName; //have to use something else not localhost
+        let temp;
+        let _this = this;
+        var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
+          temp = response.json();
+          return temp;
+        }).then(function(data){
+          console.log(data);
+          _this.setState((prevState, props) => {
+            return {actScores:data};
+          });
+        });       
+      }
+
+      fetchSatInfo(){
+        console.log("SAT");
+        console.log(this.state);
+        let uri = "http://localhost:8080/sat/" + schoolName; 
+        let temp;
+        let _this = this;
+        var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
+          temp = response.json();
+          return temp;
+        }).then(function(data){
+            console.log("SAT DATA" , data)
+            _this.setState({satScores:data});
+            console.log("state: ", _this.state);
+        });       
+      }
+
+      componentWillMount(){
+        this.fetchSatInfo();
+        this.fetchActInfo();
+      }
+
+      render(){
+            console.log("IN RENDER::: ", this.state);
+            if(this.state.actScores && this.state.satScores ){
+              let satInfo = this.state.satScores;
+              let actInfo = this.state.actScores;
+              console.log("in render, satinfo", satInfo);
+
+              const satMath = React.createElement('p', null, "Avg Math: " + satInfo.SAT_Math );
+              const satReading = React.createElement('p', null, "Avg Reading: " + satInfo.SAT_Reading );
+              const satWriting = React.createElement('p', null, "Avg Writing: " + satInfo.SAT_Writing );
+              const satContainer = React.createElement('div', null, "", [satMath, satReading, satWriting]);
+
+              //ACT
+              const actMath = React.createElement('p', null, "Avg Math: " + actInfo.ACT_Math );
+              const actEnglish = React.createElement('p', null, "Avg English: " + actInfo.ACT_English);
+              const actWriting = React.createElement('p', null, "Avg Writing: " + actInfo.ACT_Writing );
+              const actContainer = React.createElement('div', null, "", [actMath, actEnglish, actWriting]);
+
+              //container
+              const container = React.createElement('div', null, "", [satContainer, actContainer]);
+
+              return container;
+            }
+          
+            return React.createElement('div', null, "loading..." + '!');
+        }
+  }
+
+    return standTestComp;
+
+  }
+
 
   createSearchComp(){
   	var searchComp = class searchComp extends React.Component{
@@ -216,6 +294,17 @@ createGetLikesComp(){
     ReactDOM.render(
                     React.createElement(likeComp, {}),
                     document.getElementById('like-uni')
+    );
+  }
+
+  satActHelper(schoolName){
+    let standTestComp = this.createStandTestComp(schoolName);
+    console.log(standTestComp);
+
+    
+    ReactDOM.render(
+                    React.createElement(standTestComp, {}),
+                    document.getElementById('standTestComp')
     );
   }
 
