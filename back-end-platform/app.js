@@ -11,6 +11,7 @@ const yelp = require('yelp-fusion');
 const mongoose = require('mongoose');
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
+const csbApiKey = "&api_key=NeR679qRO0IZsowkBu0xeTQfnMiO61a3z0bVl1DK";
 const yelpApiKey = "goaICLvtD-bg3_zKg3e8nxfLrjHSjzQajtq23nupPs6-GKLGHIoQ1ZoitB-FT_SjBUrdlLUdhJX-gJlViIx_x575xjwmmYWDHG-BMwYPwzdolNP7xUR_HS0HjsvKWnYx";
 const client = yelp.client(yelpApiKey);
 var cacheModel = require("./models/cache.js");
@@ -31,7 +32,6 @@ const sessionConfig = {
   secret: authConfig.client_pass,
   signed: true
 };
-
 
 function extractProfile (profile) {
   let imageUrl = '';
@@ -160,10 +160,15 @@ app.get(
   // Redirect back to the original page, if any
   (req, res) => {
     const redirect = req.session.oauth2return || '/';
+    if(redirect == "/auth/login"){
+      redirect == "/";
+    }
     delete req.session.oauth2return;
 
-    let jwtSecret = uniqid();
+    let jwtSecret = authConfig.JWT_secret;
     req.session.jwtSecret = jwtSecret;
+    var date = new Date();
+    date.setTime(date.getTime() + (5 * 60 * 1000));// 5 hours
 
     const cookieOptions = {
       httpOnly: true,
@@ -174,11 +179,16 @@ app.get(
     }
 
     const authJwtToken = jwt.sign(jwtPayload, jwtSecret);
-    //res.cookie('googleAccessJwt', authJwtToken, cookieOptions);
+    res.cookie('googleAccessJwt', authJwtToken, cookieOptions);
+    //res.json( req.headers.cookie);
     res.redirect(redirect);
   }
 );
-//
+
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
 function authRequired (req, res, next) {
   if (!req.session.passport) {
     req.session.oauth2return = req.originalUrl;
@@ -187,11 +197,34 @@ function authRequired (req, res, next) {
   next();
 }
 
+function checkJwtAuth(req, res, next){
+  
+  const userJWT = JSON.stringify(req.headers.cookie);
+  //const payload = userJWT.split('.')[2];
+  console.log(userJWT);
+  const JWT = (userJWT.split("googleAccessJwt")[1]).replace("=","").split(";")[0]; //this needed to happend
+  console.log("the JWT:::", authConfig.JWT_secret);
+  console.log("XXX end of jwt");
+    if (!userJWT) { 
+        res.send(401, 'Invalid or missing authorization token');
+    }else {
+        const userJWTPayload = jwt.verify(JWT, authConfig.JWT_secret)
+        if (!userJWTPayload) {
+            //Kill the token since it is invalid
+            //
+            res.clearCookie('googleAccessJwt');
+            res.send(401, 'Invalid or missing authorization token');
+        }else{
+          next();
+        }
+    }
+}
+
 
 // Routes
 app.get('/', authRequired,function(req, res){
 
-  res.json(req.session);
+  res.json(req.headers.cookie);
 });
 
 /*DEV functions of displaying and modifying the model*/
@@ -298,7 +331,7 @@ app.get('/sat/:uniName' ,function(req, res){
     });
 
     function respond(){
-      let response = {"SAT Reading": reading,"SAT Math": math,"SAT Writing":writing,"title":"Average SAT Score"};
+      let response = {"SAT_Reading": reading,"SAT_Math": math,"SAT_Writing":writing,"title":"Average SAT Score"};
       let cacheSave = new cache({
         endpoint:"/sat",
         response: response,
@@ -358,7 +391,7 @@ app.get('/act/:uniName', function(req, res){
     });
 
     function respond(){
-      let response = {"ACT English": english, "ACT Math": math, "ACT Writing":writing, "title":"Average ACT Score"};
+      let response = {"ACT_English": english, "ACT_Math": math, "ACT_Writing":writing, "title":"Average ACT Score"};
       let cacheSave = new cache({
         endpoint:"/act",
         response: response,
@@ -723,9 +756,9 @@ app.get('/earnings/avg/:uniName', function(req, res){
   }
 });
 
-app.get('/rmp/:uniName', function(req, res){
+app.get('/rmp/:uniName', checkJwtAuth,function(req, res){
+  console.log("THE HEADER", req.headers.cookie);
   let uniName = req.params.uniName;
-
   //fist check cache
   cacheModel.checkCache("/rmp", {uniName:uniName}).then(function(result) {
         cacheResponse = result;
