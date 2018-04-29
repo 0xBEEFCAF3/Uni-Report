@@ -223,8 +223,13 @@ function checkJwtAuth(req, res, next){
 
 // Routes
 app.get('/', authRequired,function(req, res){
+  let imageSchool = "https://www.bu.edu/bostonia/files/2015/02/campus-photo.jpg";
+  let imageSchool2 = "http://greenbillion.org/wp-content/uploads/2011/10/BostonUniversity.jpg";
+    res.render('home', {
+      imageSchool:imageSchool,
+      imageSchool2: imageSchool2
 
-  res.json(req.headers.cookie);
+    });
 });
 
 /*DEV functions of displaying and modifying the model*/
@@ -848,15 +853,6 @@ app.get('/schoolreport/:uniName',authRequired, function(req, res) {
     });
 });
 
-app.get('/home',authRequired, function(req, res) {
-  let imageSchool = "https://www.bu.edu/bostonia/files/2015/02/campus-photo.jpg";
-  let imageSchool2 = "http://greenbillion.org/wp-content/uploads/2011/10/BostonUniversity.jpg";
-    res.render('home', {
-      imageSchool:imageSchool,
-      imageSchool2: imageSchool2
-
-    });
-});
 
 
 app.listen(8080, function(){
