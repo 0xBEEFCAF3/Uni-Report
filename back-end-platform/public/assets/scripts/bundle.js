@@ -94,9 +94,7 @@ var Bundle = class Bundle {
           temp = response.json();
           return temp;
         }).then(function(data){
-            console.log("SAT DATA" , data)
             _this.setState({satScores:data});
-            console.log("state: ", _this.state);
         });       
       }
 
@@ -106,21 +104,20 @@ var Bundle = class Bundle {
       }
 
       render(){
-            console.log("IN RENDER::: ", this.state);
             if(this.state.actScores && this.state.satScores ){
               let satInfo = this.state.satScores;
               let actInfo = this.state.actScores;
               console.log("in render, satinfo", satInfo);
 
-              const satMath = React.createElement('p', null, "Avg Math: " + satInfo.SAT_Math );
-              const satReading = React.createElement('p', null, "Avg Reading: " + satInfo.SAT_Reading );
-              const satWriting = React.createElement('p', null, "Avg Writing: " + satInfo.SAT_Writing );
+              const satMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Math: " + satInfo.SAT_Math );
+              const satReading = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Reading: " + satInfo.SAT_Reading );
+              const satWriting = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Writing: " + satInfo.SAT_Writing );
               const satContainer = React.createElement('div', null, "", [satMath, satReading, satWriting]);
 
               //ACT
-              const actMath = React.createElement('p', null, "Avg Math: " + actInfo.ACT_Math );
-              const actEnglish = React.createElement('p', null, "Avg English: " + actInfo.ACT_English);
-              const actWriting = React.createElement('p', null, "Avg Writing: " + actInfo.ACT_Writing );
+              const actMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Math: " + actInfo.ACT_Math );
+              const actEnglish = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg English: " + actInfo.ACT_English);
+              const actWriting = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Writing: " + actInfo.ACT_Writing );
               const actContainer = React.createElement('div', null, "", [actMath, actEnglish, actWriting]);
 
               //container
@@ -137,6 +134,52 @@ var Bundle = class Bundle {
 
   }
 
+  createEarningComp(schoolName){
+    var earningComp = class earningComp extends React.Component{
+
+      constructor(){
+        super();
+        this.state = {};
+      }
+
+      fetchEarnings(){
+        let uri = "http://localhost:8080/earnings/avg/" + schoolName; 
+        let temp;
+        let _this = this;
+        var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
+          temp = response.json();
+          return temp;
+        }).then(function(data){
+            _this.setState({mean:data.mean, median:data.median});
+        });       
+      }
+
+      componentWillMount(){
+        this.fetchEarnings();
+      }
+
+      render(){
+            if(this.state.mean){
+              let mean = this.state.mean;
+              let median = this.state.median;
+             
+              console.log("in render, satinfo", mean);
+
+              const meanElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average salary after 10 years: " + mean);
+              const medianElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Meadian salary after 10 years: " + median );
+              const container = React.createElement('div', null, "", [meanElement, medianElement]);
+
+
+              return container;
+            }
+          
+            return React.createElement('div', null, "loading..." + '!');
+        }
+  }
+
+    return earningComp;
+
+  }
 
   createSearchComp(){
   	var searchComp = class searchComp extends React.Component{
@@ -305,6 +348,15 @@ createGetLikesComp(){
     ReactDOM.render(
                     React.createElement(standTestComp, {}),
                     document.getElementById('standTestComp')
+    );
+  }
+
+  earningHelper(schoolName){
+    let earningComp = this.createEarningComp(schoolName);
+    
+    ReactDOM.render(
+                    React.createElement(earningComp, {}),
+                    document.getElementById('earningHelper')
     );
   }
 

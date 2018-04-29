@@ -245,6 +245,12 @@ app.get('/deleteAllUsers',authRequired ,function(req, res){
   });
   res.send('deleted');
 });
+app.get('/clearCache',authRequired ,function(req, res){
+  cache.remove({}, function(err) { 
+   console.log('collection removed') 
+  });
+  res.send('deleted');
+});
 
 app.get('/profile',authRequired, function(req, res){
   if(req.session.passport){
@@ -756,7 +762,7 @@ app.get('/earnings/avg/:uniName', function(req, res){
   }
 });
 
-app.get('/rmp/:uniName', checkJwtAuth,function(req, res){
+app.get('/rmp/:uniName',function(req, res){
   console.log("THE HEADER", req.headers.cookie);
   let uniName = req.params.uniName;
   //fist check cache
