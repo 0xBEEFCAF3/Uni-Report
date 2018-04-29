@@ -212,6 +212,47 @@ var Bundle = class Bundle {
     return locationComp;
   }
 
+  createGenderComp(schoolName){
+    var genderComp = class genderComp extends React.Component{
+      constructor(){
+        super();
+        this.state = {};
+      }
+
+      fetchEarnings(){
+        let uri = "http://localhost:8080/earnings/gender/" + schoolName; 
+        let temp;
+        let _this = this;
+        var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
+          temp = response.json();
+          return temp;
+        }).then(function(data){
+            _this.setState({males:data.males, females:data.females});
+        });       
+      }
+
+      componentWillMount(){
+        this.fetchEarnings();
+      }
+
+      render(){
+            if(this.state.males){
+              let males = this.state.males;
+              let females = this.state.females;
+              const malesElement = React.createElement('i', {className:"fas fa-male", style:{"fontSize":"25px","paddingRight": "10px"}}, " : " + males);
+              const femalesElement = React.createElement('i',  {className:"fas fa-female", style:{"fontSize":"25px","paddingRight": "10px"}}, " : " +  females);
+              const container = React.createElement('div', null, "", [malesElement, femalesElement]);
+
+              return container;
+            }
+          
+            return React.createElement('div', null, "loading..." + '!');
+        }
+    }
+    return genderComp;
+  }
+
+
   createSearchComp(){
   	var searchComp = class searchComp extends React.Component{
 
@@ -396,6 +437,15 @@ createGetLikesComp(){
     ReactDOM.render(
                     React.createElement(locationComp, {}),
                     document.getElementById('locationComp')
+    );
+  }
+
+   genderHelper(schoolName){
+    let genderComp = this.createGenderComp(schoolName);
+    
+    ReactDOM.render(
+                    React.createElement(genderComp, {}),
+                    document.getElementById('genderComp')
     );
   }
 
