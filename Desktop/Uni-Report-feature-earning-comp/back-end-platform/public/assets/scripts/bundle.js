@@ -43,7 +43,7 @@ var Bundle = class Bundle {
 				const clubs = React.createElement("i",{className:"fas fa-users",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.CLUBS + "-- Clubs");
 				const facilities = React.createElement("i",{className:"fas fa-building",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.FACILITIES + "-- Facilities");
 				const location = React.createElement("i",{className:"fas fa-map-marker",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.LOCATION + "-- Location");
-				const oppurtunity = React.createElement("i",{className:"fas fa-handshake",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.OPPORTUNITY + "-- Oppurtunity");
+				const oppurtunity = React.createElement("i",{className:"fas fa-handshake",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.OPPORTUNITY + "-- Opportunity");
 				const social = React.createElement("i",{className:"fas fa-user",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.SOCIAL + "-- Social");
 				const container = React.createElement('div', {}, [title, food, internet,reputation, clubs, facilities, oppurtunity, social]);
 				
@@ -107,15 +107,15 @@ var Bundle = class Bundle {
               let satInfo = this.state.satScores;
               let actInfo = this.state.actScores;
 
-              const satMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Math: " + satInfo.SAT_Math );
-              const satReading = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Reading: " + satInfo.SAT_Reading );
-              const satWriting = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Writing: " + satInfo.SAT_Writing );
+              const satMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "SAT Math: " + satInfo.SAT_Math );
+              const satReading = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "SAT Reading: " + satInfo.SAT_Reading );
+              const satWriting = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "SAT Writing: " + satInfo.SAT_Writing );
               const satContainer = React.createElement('div', null, "", [satMath, satReading, satWriting]);
 
               //ACT
-              const actMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Math: " + actInfo.ACT_Math );
-              const actEnglish = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg English: " + actInfo.ACT_English);
-              const actWriting = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Writing: " + actInfo.ACT_Writing );
+              const actMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "ACT Math: " + actInfo.ACT_Math );
+              const actEnglish = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "ACT English: " + actInfo.ACT_English);
+              const actWriting = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "ACT Writing: " + actInfo.ACT_Writing );
               const actContainer = React.createElement('div', null, "", [actMath, actEnglish, actWriting]);
 
               //container
@@ -199,8 +199,8 @@ var Bundle = class Bundle {
             if(this.state.rating){
               let rating = this.state.rating;
               let dollars = this.state.dollars;
-              const meanElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average Eatery rating: " + rating);
-              const dollarElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average Eatery price: " + {1:"$", 2:"$$",3:"$$$"}[dollars] );
+              const meanElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average Eatery Rating: " + rating);
+              const dollarElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average Eatery Price: " + {1:"$", 2:"$$",3:"$$$"}[dollars] );
               const container = React.createElement('div', null, "", [meanElement, dollarElement]);
 
               return container;
@@ -281,8 +281,11 @@ var Bundle = class Bundle {
 
       render(){
             if(this.state.price){
-              let state = this.state.price;
-              const priceElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Tuition: " + "$" + price);
+              //console.log(data.price)
+              let price = this.state.price;
+              let url = price.split("schoolreport")[0];
+              console.log(url);
+              const priceElement = React.createElement('a', {href:"https://"+url ,style:{"fontSize":"20px","paddingRight": "10px"}}, price);
               const container = React.createElement('div', null, "", [priceElement]);
 
               return container;
