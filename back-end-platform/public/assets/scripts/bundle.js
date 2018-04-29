@@ -35,7 +35,6 @@ var Bundle = class Bundle {
   			if(this.state.RMPUniInfo){
 
   				let RMPData = this.state.RMPUniInfo;
-  				console.log(RMPData);
 
   			const title = React.createElement('h1', {}, 'University Campus Properties');
 				const food = React.createElement("i",{className:"fas fa-utensils",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.FOOD + "-- Food");
@@ -107,7 +106,6 @@ var Bundle = class Bundle {
             if(this.state.actScores && this.state.satScores ){
               let satInfo = this.state.satScores;
               let actInfo = this.state.actScores;
-              console.log("in render, satinfo", satInfo);
 
               const satMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Math: " + satInfo.SAT_Math );
               const satReading = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Reading: " + satInfo.SAT_Reading );
@@ -162,13 +160,9 @@ var Bundle = class Bundle {
             if(this.state.mean){
               let mean = this.state.mean;
               let median = this.state.median;
-             
-              console.log("in render, satinfo", mean);
-
               const meanElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average salary after 10 years: " + mean);
               const medianElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Meadian salary after 10 years: " + median );
               const container = React.createElement('div', null, "", [meanElement, medianElement]);
-
 
               return container;
             }
@@ -176,9 +170,46 @@ var Bundle = class Bundle {
             return React.createElement('div', null, "loading..." + '!');
         }
   }
-
     return earningComp;
+  }
+  createLocationComp(schoolName){
+    var locationComp = class locationComp extends React.Component{
+      constructor(){
+        super();
+        this.state = {};
+      }
 
+      fetchEarnings(){
+        let uri = "http://localhost:8080/location/" + schoolName; 
+        let temp;
+        let _this = this;
+        var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
+          temp = response.json();
+          return temp;
+        }).then(function(data){
+            _this.setState({rating:data.rating, dollars:data.dollars});
+        });       
+      }
+
+      componentWillMount(){
+        this.fetchEarnings();
+      }
+
+      render(){
+            if(this.state.rating){
+              let rating = this.state.rating;
+              let dollars = this.state.dollars;
+              const meanElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average Eatery rating: " + rating);
+              const dollarElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average Eatery price: " + {1:"$", 2:"$$",3:"$$$"}[dollars] );
+              const container = React.createElement('div', null, "", [meanElement, dollarElement]);
+
+              return container;
+            }
+          
+            return React.createElement('div', null, "loading..." + '!');
+        }
+  }
+    return locationComp;
   }
 
   createSearchComp(){
@@ -204,7 +235,6 @@ var Bundle = class Bundle {
 			    });
   			 }
   		});
-
 
   		const btn = React.createElement('button', {type:"button", className:"btn btn-primary",
   		style:{color:'black'},
@@ -357,6 +387,15 @@ createGetLikesComp(){
     ReactDOM.render(
                     React.createElement(earningComp, {}),
                     document.getElementById('earningHelper')
+    );
+  }
+
+  locationHelper(schoolName){
+    let locationComp = this.createLocationComp(schoolName);
+    
+    ReactDOM.render(
+                    React.createElement(locationComp, {}),
+                    document.getElementById('locationComp')
     );
   }
 
