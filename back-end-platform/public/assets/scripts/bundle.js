@@ -23,7 +23,7 @@ var Bundle = class Bundle {
   				_this.setState((prevState, props) => {
 				  return {RMPUniInfo:data};
 				});
-  			}); 			
+  			});
   		}
 
   		componentWillMount(){
@@ -46,7 +46,7 @@ var Bundle = class Bundle {
 				const oppurtunity = React.createElement("i",{className:"fas fa-handshake",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.OPPORTUNITY + "-- Oppurtunity");
 				const social = React.createElement("i",{className:"fas fa-user",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.SOCIAL + "-- Social");
 				const container = React.createElement('div', {}, [title, food, internet,reputation, clubs, facilities, oppurtunity, social]);
-				
+
 				return container;}
 			//ELSE
             return React.createElement('div', null, "loading..." + '!');
@@ -80,13 +80,13 @@ var Bundle = class Bundle {
           _this.setState((prevState, props) => {
             return {actScores:data};
           });
-        });       
+        });
       }
 
       fetchSatInfo(){
         console.log("SAT");
         console.log(this.state);
-        let uri = "http://localhost:8080/sat/" + schoolName; 
+        let uri = "http://localhost:8080/sat/" + schoolName;
         let temp;
         let _this = this;
         var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
@@ -94,7 +94,7 @@ var Bundle = class Bundle {
           return temp;
         }).then(function(data){
             _this.setState({satScores:data});
-        });       
+        });
       }
 
       componentWillMount(){
@@ -123,7 +123,7 @@ var Bundle = class Bundle {
 
               return container;
             }
-          
+
             return React.createElement('div', null, "loading..." + '!');
         }
   }
@@ -141,7 +141,7 @@ var Bundle = class Bundle {
       }
 
       fetchEarnings(){
-        let uri = "http://localhost:8080/earnings/avg/" + schoolName; 
+        let uri = "http://localhost:8080/earnings/avg/" + schoolName;
         let temp;
         let _this = this;
         var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
@@ -149,7 +149,7 @@ var Bundle = class Bundle {
           return temp;
         }).then(function(data){
             _this.setState({mean:data.mean, median:data.median});
-        });       
+        });
       }
 
       componentWillMount(){
@@ -166,7 +166,7 @@ var Bundle = class Bundle {
 
               return container;
             }
-          
+
             return React.createElement('div', null, "loading..." + '!');
         }
   }
@@ -180,7 +180,7 @@ var Bundle = class Bundle {
       }
 
       fetchEarnings(){
-        let uri = "http://localhost:8080/location/" + schoolName; 
+        let uri = "http://localhost:8080/location/" + schoolName;
         let temp;
         let _this = this;
         var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
@@ -188,7 +188,7 @@ var Bundle = class Bundle {
           return temp;
         }).then(function(data){
             _this.setState({rating:data.rating, dollars:data.dollars});
-        });       
+        });
       }
 
       componentWillMount(){
@@ -205,7 +205,7 @@ var Bundle = class Bundle {
 
               return container;
             }
-          
+
             return React.createElement('div', null, "loading..." + '!');
         }
   }
@@ -228,7 +228,7 @@ var Bundle = class Bundle {
 
   		render(){
   		var _this = this;
-  		const input = React.createElement('input', {className:"form-control nav_input","type":"text", onChange: 
+  		const input = React.createElement('input', {className:"form-control nav_input","type":"text", onChange:
   			function(evt){
   			 	_this.setState({
 			      inputValue: evt.target.value
@@ -248,7 +248,7 @@ var Bundle = class Bundle {
 	  			}
 	  			console.log(schoolName);
 	  			schoolName = schoolName.replace(" ","+");
-	  			//redirect user to 
+	  			//redirect user to
   				window.location.replace("http://localhost:8080/schoolreport/" + schoolName);	//switch localhost with something global variable
   			}
 
@@ -316,7 +316,7 @@ createGetLikesComp(){
           _this.setState((prevState, props) => {
             return {likeUnis:data};
           });
-        });       
+        });
       }
 
       componentWillMount(){
@@ -329,7 +329,7 @@ createGetLikesComp(){
               let link = React.createElement('a', {href:"/schoolreport/"+ uni.replace(" ", "+")}, uni);
               let temp = React.createElement('p', null, null, [link] );
               unis.push(temp);
-          });           
+          });
           const container = React.createElement('div', {}, [unis]);
           return container;
         }else{
@@ -340,7 +340,7 @@ createGetLikesComp(){
   }
     return getLikesComp;
 }
-  
+
 
   /*******************
   	Helper Functions
@@ -374,7 +374,7 @@ createGetLikesComp(){
     let standTestComp = this.createStandTestComp(schoolName);
     console.log(standTestComp);
 
-    
+
     ReactDOM.render(
                     React.createElement(standTestComp, {}),
                     document.getElementById('standTestComp')
@@ -383,7 +383,7 @@ createGetLikesComp(){
 
   earningHelper(schoolName){
     let earningComp = this.createEarningComp(schoolName);
-    
+
     ReactDOM.render(
                     React.createElement(earningComp, {}),
                     document.getElementById('earningHelper')
@@ -392,7 +392,7 @@ createGetLikesComp(){
 
   locationHelper(schoolName){
     let locationComp = this.createLocationComp(schoolName);
-    
+
     ReactDOM.render(
                     React.createElement(locationComp, {}),
                     document.getElementById('locationComp')
@@ -410,4 +410,3 @@ createGetLikesComp(){
 
 
 }
-

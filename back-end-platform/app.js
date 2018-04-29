@@ -77,10 +77,10 @@ function addUser(user){
         console.log(err);
   });
 }
-  
+
 passport.serializeUser((user, cb) => {
   console.log(cb);
-  //add user to model 
+  //add user to model
   addUser(user);
   cb(null, user);
 });
@@ -95,7 +95,7 @@ app.configure(function(){
   app.set('view engine', 'ejs');
   //app.engine('jsx', require('express-react-views').createEngine());
   //Oauth specific things
-  
+
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(session(sessionConfig));
@@ -172,7 +172,7 @@ app.get(
 
     const cookieOptions = {
       httpOnly: true,
-      expires: 0 
+      expires: 0
     }
     const jwtPayload = {
      googleAccessToken: jwtSecret
@@ -198,14 +198,14 @@ function authRequired (req, res, next) {
 }
 
 function checkJwtAuth(req, res, next){
-  
+
   const userJWT = JSON.stringify(req.headers.cookie);
   //const payload = userJWT.split('.')[2];
   console.log(userJWT);
   const JWT = (userJWT.split("googleAccessJwt")[1]).replace("=","").split(";")[0]; //this needed to happend
   console.log("the JWT:::", authConfig.JWT_secret);
   console.log("XXX end of jwt");
-    if (!userJWT) { 
+    if (!userJWT) {
         res.send(401, 'Invalid or missing authorization token');
     }else {
         const userJWTPayload = jwt.verify(JWT, authConfig.JWT_secret)
@@ -240,14 +240,14 @@ app.get('/displayUsers',authRequired ,function(req, res){
   });
 });
 app.get('/deleteAllUsers',authRequired ,function(req, res){
-  user.remove({}, function(err) { 
-   console.log('collection removed') 
+  user.remove({}, function(err) {
+   console.log('collection removed')
   });
   res.send('deleted');
 });
 app.get('/clearCache',authRequired ,function(req, res){
-  cache.remove({}, function(err) { 
-   console.log('collection removed') 
+  cache.remove({}, function(err) {
+   console.log('collection removed')
   });
   res.send('deleted');
 });
@@ -259,7 +259,7 @@ app.get('/profile',authRequired, function(req, res){
     res.redirect("/auth/login");
     return;
   }
-  
+
   let name = req.session.passport.user.displayName;
   let imageUrl = req.session.passport.user.image;
 
@@ -269,7 +269,7 @@ app.get('/profile',authRequired, function(req, res){
     });
 });
 
-app.post('/updateLikes', function(req, res){  
+app.post('/updateLikes', function(req, res){
   let uniName =  req.body.uniName;
   //let userId = req.session.passport.user.id;
   let userId = 102882686044984762722;
@@ -823,7 +823,7 @@ app.get('/rmp/:uniName',function(req, res){
                 if (err) return console.error(err);
 
               });
-              
+
               res.json(ratings);
 
               }
@@ -844,6 +844,16 @@ app.get('/schoolreport/:uniName',authRequired, function(req, res) {
     res.render('school-report', {
         uniName:String(uniName.replace("+", " ")),
         uniNameApiString:String(uniName)
+
+    });
+});
+
+app.get('/home',authRequired, function(req, res) {
+  let imageSchool = "https://www.bu.edu/bostonia/files/2015/02/campus-photo.jpg";
+  let imageSchool2 = "http://greenbillion.org/wp-content/uploads/2011/10/BostonUniversity.jpg";
+    res.render('home', {
+      imageSchool:imageSchool,
+      imageSchool2: imageSchool2
 
     });
 });
