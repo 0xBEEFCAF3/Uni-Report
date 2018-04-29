@@ -2,6 +2,91 @@ var Bundle = class Bundle {
 
   constructor(){
   }
+  createCalcComp(schoolName){
+    var calcComp = class calcComp extends React.Component{
+      constructor(){
+        super();
+        this.state = {};
+      }
+
+      fetchPriceInfo(){
+        let uri = "http://localhost:8080/price/" + schoolName; 
+        let temp;
+        let _this = this;
+        var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
+          temp = response.json();
+          return temp;
+        }).then(function(data){
+            _this.setState({price:data.price});
+        });       
+      }
+
+      componentWillMount(){
+        this.fetchPriceInfo();
+      }
+
+      render(){
+            if(this.state.price){
+              //console.log(data.price)
+              let price = this.state.price;
+              let url = price.split("schoolreport")[0];
+              console.log(url);
+              const priceElement = React.createElement('a', {href:"https://"+url ,style:{"fontSize":"20px","paddingRight": "10px"}}, price);
+              const container = React.createElement('div', null, "", [priceElement]);
+
+              return container;
+            }
+          
+            return React.createElement('div', null, "loading..." + '!');
+        }
+  }
+    return calcComp;
+  }
+
+  createInformationComp(schoolName){
+    var informationComp = class informationComp extends React.Component{
+      constructor(){
+        super();
+        this.state = {};
+      }
+
+      fetchUniInfo(){
+        let uri = "http://localhost:8080/info/" + schoolName; 
+        let temp;
+        let _this = this;
+        var result = fetch(uri,{credentials: 'same-origin'}).then(response =>{
+          temp = response.json();
+          return temp;
+        }).then(function(data){
+            _this.setState({state:data.state, city:data.city, zip:data.zip, school_url:data.school_url, title:data.title});
+        });       
+      }
+
+      componentWillMount(){
+        this.fetchUniInfo();
+      }
+
+      render(){
+            if(this.state.state){
+              let state = this.state.state;
+              let city = this.state.city;
+              let zip = this.state.zip;
+              let school_url = this.state.school_url;
+              let title = this.state.title;
+              const addressElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Address: " + city + ", " + state + " " + zip);
+              const titleElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "University: " + title );
+              const urlElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Website Link: " + school_url );
+              const container = React.createElement('div', null, "", [addressElement, urlElement]);
+
+              return container;
+            }
+          
+            return React.createElement('div', null, "loading..." + '!');
+        }
+    }
+    return informationComp;
+  }
+
 
   createRMPComp(schoolName){
   	var RMPComp = class RMPComp extends React.Component{
@@ -290,7 +375,7 @@ var Bundle = class Bundle {
 	  			console.log(schoolName);
 	  			schoolName = schoolName.replace(" ","+");
 	  			//redirect user to 
-  				window.location.replace("http://localhost:8080/schoolreport/" + schoolName);	//switch localhost with something global variable
+  				window.location.replace("http://localhost:8080/schoolreport/" + schoolName);	
   			}
 
   		}, "Search");
@@ -457,6 +542,23 @@ createGetLikesComp(){
     );
   }
 
+  informationHelper(schoolName){
+    let informationComp = this.createInformationComp(schoolName);
+    
+    ReactDOM.render(
+                    React.createElement(informationComp, {}),
+                    document.getElementById('informationComp')
+    );
+  }
+
+  priceCalcHelper(schoolName){
+    let calcComp = this.createCalcComp(schoolName);
+    
+    ReactDOM.render(
+                    React.createElement(calcComp, {}),
+                    document.getElementById('calcComp')
+    );
+  }
 
 
 }
