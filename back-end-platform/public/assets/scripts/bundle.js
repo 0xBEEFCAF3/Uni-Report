@@ -367,7 +367,7 @@ var Bundle = class Bundle {
 
   		render(){
   		var _this = this;
-  		const input = React.createElement('input', {className:"form-control nav_input","type":"text", onChange: 
+  		const input = React.createElement('input', {style:{width:"500px"},className:"form-control nav_input","type":"text", onChange: 
   			function(evt){
   			 	_this.setState({
 			      inputValue: evt.target.value

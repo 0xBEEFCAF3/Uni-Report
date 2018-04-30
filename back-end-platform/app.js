@@ -876,10 +876,11 @@ app.get('/rating/:uniName',function(req, res){
   });
 
   function callAPI(){
-    let url = 'https://www.usnews.com/best-colleges/search?school-name='+ uniName;
+    uniName = uniName.replaceAll("+", "-");
+    let url = 'https://www.niche.com/colleges/'+ uniName;
 
     var options = { method: 'GET',
-  url: 'https://www.usnews.com/best-colleges/search',
+  url: url,
   qs: { 'school-name': 'boston university' },
   headers: 
    { 'postman-token': 'cce28961-68c1-946b-afdd-1222136fd97a',
@@ -890,12 +891,17 @@ app.get('/rating/:uniName',function(req, res){
 
     request(options, function(error, response, html){
         if(!error){
-            console.log(response);
             let $ = cheerio.load(html);
-            console.log($(".text-strong div").text());
-
-           res.json("yall did it");
-
+            let rankings = [];
+            $("li.rankings__collection__item").each(function(){
+              try{
+                let temp = ($(this).text()).split("in America");
+              }catch(e){
+                let temp = ($(this).text());
+              }
+              rankings.push(temp.join(" "));
+            });
+           res.json(rankings);
         }
 
       });//first request
