@@ -30,8 +30,10 @@ var Bundle = class Bundle {
               //console.log(data.price)
               let price = this.state.price;
               let url = price.split("schoolreport")[0];
-              console.log(url);
-              const priceElement = React.createElement('a', {href:"https://"+url ,style:{"fontSize":"20px","paddingRight": "10px"}}, price);
+              if(url.includes("https://") !== true){
+                url = "https://"+url;
+              } 
+              const priceElement = React.createElement('a', {href:url ,style:{"fontSize":"20px","paddingRight": "10px"}}, price);
               const container = React.createElement('div', null, "", [priceElement]);
 
               return container;
@@ -121,7 +123,7 @@ var Bundle = class Bundle {
 
   				let RMPData = this.state.RMPUniInfo;
 
-  			const title = React.createElement('h1', {}, 'University Campus Properties');
+  			//const title = React.createElement('h1', {}, 'University Campus Properties');
 				const food = React.createElement("i",{className:"fas fa-utensils",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.FOOD + "-- Food");
 				const internet = React.createElement("i",{className:"fas fa-desktop",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.INTERNET + "-- Internet");
 				const reputation = React.createElement("i",{className:"fas fa-book",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.REPUTATION + "-- Reputation");
@@ -130,7 +132,7 @@ var Bundle = class Bundle {
 				const location = React.createElement("i",{className:"fas fa-map-marker",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.LOCATION + "-- Location");
 				const oppurtunity = React.createElement("i",{className:"fas fa-handshake",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.OPPORTUNITY + "-- Oppurtunity");
 				const social = React.createElement("i",{className:"fas fa-user",style:{"fontSize":"20px","paddingRight": "10px"}},": "+ RMPData.SOCIAL + "-- Social");
-				const container = React.createElement('div', {}, [title, food, internet,reputation, clubs, facilities, oppurtunity, social]);
+				const container = React.createElement('div', {}, [ food, internet,reputation, clubs, facilities, oppurtunity, social]);
 				
 				return container;}
 			//ELSE
@@ -192,15 +194,27 @@ var Bundle = class Bundle {
               let satInfo = this.state.satScores;
               let actInfo = this.state.actScores;
 
-              const satMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Math: " + satInfo.SAT_Math );
-              const satReading = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Reading: " + satInfo.SAT_Reading );
-              const satWriting = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Writing: " + satInfo.SAT_Writing );
+              Object.keys(satInfo).map(function(key, index) {
+                 if(satInfo[key] == null){
+                  satInfo[key] = "Not Available";
+                 }
+              });
+
+              Object.keys(actInfo).map(function(key, index) {
+                 if(actInfo[key] == null){
+                  actInfo[key] = "Not Available";
+                 }
+              });
+
+              const satMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average SAT Math: " + satInfo.SAT_Math );
+              const satReading = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average SAT Reading: " + satInfo.SAT_Reading );
+              const satWriting = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average SAT Writing: " + satInfo.SAT_Writing );
               const satContainer = React.createElement('div', null, "", [satMath, satReading, satWriting]);
 
               //ACT
-              const actMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Math: " + actInfo.ACT_Math );
-              const actEnglish = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg English: " + actInfo.ACT_English);
-              const actWriting = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Avg Writing: " + actInfo.ACT_Writing );
+              const actMath = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average ACT Math: " + actInfo.ACT_Math );
+              const actEnglish = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average ACT English: " + actInfo.ACT_English);
+              const actWriting = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average ACT Writing: " + actInfo.ACT_Writing );
               const actContainer = React.createElement('div', null, "", [actMath, actEnglish, actWriting]);
 
               //container
@@ -246,9 +260,8 @@ var Bundle = class Bundle {
               let mean = this.state.mean;
               let median = this.state.median;
               const meanElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Average salary after 10 years: " + mean);
-              const medianElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Meadian salary after 10 years: " + median );
+              const medianElement = React.createElement('p', {style:{"fontSize":"20px","paddingRight": "10px"}}, "Median salary after 10 years: " + median );
               const container = React.createElement('div', null, "", [meanElement, medianElement]);
-
               return container;
             }
           
@@ -485,6 +498,14 @@ createGetLikesComp(){
   	ReactDOM.render(
                     React.createElement(searchComp, {}),
                     document.getElementById('nav-search')
+    );
+  }
+
+  schoolSearchSchool(){
+    let searchComp = this.createSearchComp();
+    ReactDOM.render(
+                    React.createElement(searchComp, {}),
+                    document.getElementById('school-search')
     );
   }
 

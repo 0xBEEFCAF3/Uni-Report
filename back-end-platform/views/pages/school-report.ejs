@@ -1,3 +1,5 @@
+<% name = userName; %>
+
 <% include ../partials/head %>
 <% include ../partials/header %>
 <!-- MAIN -->
@@ -8,36 +10,39 @@
 					<!-- OVERVIEW -->
 					<div class="panel panel-headline">
 						<div class="panel-heading">
-							<h1 class="panel-title"><%= uniName %></h1>
+							<h1 class="panel-title" style="text-transform:capitalize;font-size: 36px;"><%= uniName %></h1>
 							<div id="like-uni"> </div>
 						</div>
-						<div id="rmp" class="panel-body">
-							
+						<div class="panel-body">
+							<img src="<%= staticURL %>">
 						</div>
 					</div>
 					<!-- END OVERVIEW -->
 					<div class="row">
-						<div class="col-md-6">
+						<div class="col-md-4">
+							<!-- RECENT PURCHASES -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">University Campus Properties</h3>
+									
+								</div>
+								
+								<div class="panel-footer">
+									<div id="rmp" class="panel-body">
+							
+						</div>
+								</div>
+							</div>
+							<!-- END RECENT PURCHASES -->
+						</div>
+						<div class="col-md-4">
 							<!-- RECENT PURCHASES -->
 							<div class="panel">
 								<div class="panel-heading">
 									<h3 class="panel-title">Standardized Testing</h3>
 									
 								</div>
-								<div class="panel-body no-padding">
-									<table class="table table-striped">
-										<thead>
-											<tr>
-												
-											</tr>
-										</thead>
-										<tbody>
-											<tr>
-												
-											</tr>
-										</tbody>
-									</table>
-								</div>
+								
 								<div class="panel-footer">
 									<div id="standTestComp" class="panel-body">
 							
@@ -46,7 +51,7 @@
 							</div>
 							<!-- END RECENT PURCHASES -->
 						</div>
-						<div class="col-md-6">
+						<div class="col-md-4">
 							<!-- MULTI CHARTS -->
 							<div class="panel">
 								<div class="panel-heading">
@@ -80,7 +85,7 @@
 							<!-- TIMELINE -->
 							<div class="panel">
 								<div class="panel-heading">
-									<h3 class="panel-title">Average gender ratio</h3>
+									<h3 class="panel-title"> Annual expected Males and Females </h3>
 									
 								</div>
 								<div class="panel-body" id="genderComp">

@@ -24,6 +24,7 @@ const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const uniqid =  require('uniqid');
+const googleMaps = require('googlemaps');
 var app = module.exports = express.createServer();
 //oauth config
 const sessionConfig = {
@@ -228,8 +229,8 @@ app.get('/', authRequired,function(req, res){
   let imageSchool2 = "http://greenbillion.org/wp-content/uploads/2011/10/BostonUniversity.jpg";
     res.render('home', {
       imageSchool:imageSchool,
-      imageSchool2: imageSchool2
-
+      imageSchool2: imageSchool2,
+      name: (req.session.passport.user.displayName).split(" ")[0]
     });
 });
 
@@ -271,9 +272,18 @@ app.get('/profile',authRequired, function(req, res){
 
   res.render('profile', {
         name:name,
-        imageUrl:imageUrl
+        imageUrl:imageUrl,
+        name: (req.session.passport.user.displayName).split(" ")[0]
     });
 });
+
+app.get('/search-school',authRequired, function(req, res){
+
+  res.render('search-school', {
+        userName: (req.session.passport.user.displayName).split(" ")[0]
+    });
+});
+
 
 app.post('/updateLikes', function(req, res){  
   let uniName =  req.body.uniName;
@@ -844,14 +854,67 @@ app.get('/rmp/:uniName',function(req, res){
   }
 });
 
+//get static url lib
+function getStaticImage(schoolName){
+  var publicConfig = {
+    key: "AIzaSyDcwz-wYyiZlwyRUhMVZxOVotvqX5SKv0k",
+    stagger_time:       1000, // for elevationPath 
+    encode_polylines:   false,
+    secure:             true, // use https 
+    proxy:              'http://127.0.0.1:8080' // optional, set a proxy for HTTP requests 
+  };
+  var gmAPI = new googleMaps(publicConfig);
+  var params = {
+  center: schoolName,
+  zoom: 15,
+  size: '500x300',
+  maptype: 'roadmap',
+  markers: [
+    {
+      location: schoolName,
+      label   : 'A',
+      color   : 'green',
+      shadow  : true
+    }
+  ],
+  style: [
+    {
+      feature: 'road',
+      element: 'all',
+      rules: {
+        hue: '0x00ff00'
+      }
+    }
+  ],
+  path: [
+    {
+      color: '0x0000ff',
+      weight: '5',
+      points: [
+        '41.139817,-77.454439',
+        '41.138621,-77.451596'
+      ]
+    }
+  ]
+};
+
+  return gmAPI.staticMap(params); // return static map URL
+}
 
 app.get('/schoolreport/:uniName',authRequired, function(req, res) {
+  //res.json(req.session); 
     let uniName = req.params.uniName;
+    let staticURL = getStaticImage(uniName);
+    console.log(staticURL);
+
     res.render('school-report', {
         uniName:String(uniName.replace("+", " ")),
-        uniNameApiString:String(uniName)
+        uniNameApiString:String(uniName),
+        userName: (req.session.passport.user.displayName).split(" ")[0],
+        staticURL: staticURL
 
     });
+    
 });
 
 
