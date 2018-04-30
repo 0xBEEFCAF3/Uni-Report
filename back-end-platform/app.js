@@ -854,9 +854,6 @@ app.get('/rmp/:uniName', checkJwtAuth, function(req, res){
   }
 });
 
-
-
-
 app.get('/rating/:uniName',function(req, res){
 
   let uniName = req.params.uniName;
@@ -896,10 +893,12 @@ app.get('/rating/:uniName',function(req, res){
             $("li.rankings__collection__item").each(function(){
               try{
                 let temp = ($(this).text()).split("in America");
+                rankings.push(temp.join(" "));
               }catch(e){
                 let temp = ($(this).text());
+                rankings.push(temp.join(" "));
               }
-              rankings.push(temp.join(" "));
+              
             });
            res.json(rankings);
         }
