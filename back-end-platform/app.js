@@ -309,7 +309,7 @@ app.get('/getLikedUnis' ,function(req, res){
 });
 
 
-app.get('/sat/:uniName' ,function(req, res){
+app.get('/sat/:uniName',checkJwtAuth ,function(req, res){
   let uniName = req.params.uniName;
   //fist check cache
   cacheModel.checkCache("/sat", {uniName:uniName}).then(function(result) {
@@ -369,7 +369,7 @@ app.get('/sat/:uniName' ,function(req, res){
   }
 });   //end of SAT endpoint
 
-app.get('/act/:uniName', function(req, res){
+app.get('/act/:uniName',checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
 
   //fist check cache
@@ -430,7 +430,7 @@ app.get('/act/:uniName', function(req, res){
 });   //end of ACT endpoint
 
 
-app.get('/location/:uniName' ,function(req, res){
+app.get('/location/:uniName', checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
   let cacheResponse = null;
   //fist check cache
@@ -516,7 +516,7 @@ app.get('/location/:uniName' ,function(req, res){
  }
 });//end of location endpoint
 
-app.get('/info/:uniName' ,function(req, res){
+app.get('/info/:uniName',checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
 
 
@@ -545,7 +545,6 @@ app.get('/info/:uniName' ,function(req, res){
     let zip;
     let city;
     let website;
-
 
     request(infoUrl, function (error, response, body) {
       if (error) throw new Error(error);
@@ -580,7 +579,7 @@ app.get('/info/:uniName' ,function(req, res){
   }
 });
 
-app.get('/price/:uniName', function(req, res){
+app.get('/price/:uniName',checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
 
   //fist check cache
@@ -634,7 +633,7 @@ app.get('/price/:uniName', function(req, res){
 });
 
 
-app.get('/earnings/gender/:uniName' , function(req, res){
+app.get('/earnings/gender/:uniName',checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
   //fist check cache
   cacheModel.checkCache("/earnings/gender", {uniName:uniName}).then(function(result) {
@@ -705,7 +704,7 @@ app.get('/earnings/gender/:uniName' , function(req, res){
 });
 
 
-app.get('/earnings/avg/:uniName', function(req, res){
+app.get('/earnings/avg/:uniName',checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
 
   //fist check cache
@@ -778,7 +777,9 @@ app.get('/earnings/avg/:uniName', function(req, res){
   }
 });
 
-app.get('/rmp/:uniName',function(req, res){
+
+
+app.get('/rmp/:uniName', checkJwtAuth, function(req, res){
   console.log("THE HEADER", req.headers.cookie);
   let uniName = req.params.uniName;
   //fist check cache
@@ -814,8 +815,7 @@ app.get('/rmp/:uniName',function(req, res){
         sid = sid.split("?")[1];
 
             let ratingURL =  "http://www.ratemyprofessors.com/campusRatings.jsp?" + sid;
-            console.log("the rating url and sid");
-            console.log(ratingURL, sid);
+            
             request(ratingURL, function(error, response, html){
               if(!error){
                   var $ = cheerio.load(html);
@@ -845,6 +845,56 @@ app.get('/rmp/:uniName',function(req, res){
               }
 
             });
+
+        }
+
+      });//first request
+
+  //end of the rmp route
+  }
+});
+
+
+
+
+app.get('/rating/:uniName',function(req, res){
+
+  let uniName = req.params.uniName;
+  //fist check cache
+  cacheModel.checkCache("/rating", {uniName:uniName}).then(function(result) {
+        cacheResponse = result;
+        if(Object.keys(cacheResponse).length === 0 && cacheResponse.constructor === Object){
+          //case if api call is not in cache
+          console.log(cacheResponse);
+          callAPI();//just call the api
+          return;
+        }
+        res.json(cacheResponse);//send json'd cache object.
+
+    }, function(err) {
+        console.log(err);
+  });
+
+  function callAPI(){
+    let url = 'https://www.usnews.com/best-colleges/search?school-name='+ uniName;
+
+    var options = { method: 'GET',
+  url: 'https://www.usnews.com/best-colleges/search',
+  qs: { 'school-name': 'boston university' },
+  headers: 
+   { 'postman-token': 'cce28961-68c1-946b-afdd-1222136fd97a',
+     'cache-control': 'no-cache' } };
+
+
+
+
+    request(options, function(error, response, html){
+        if(!error){
+            console.log(response);
+            let $ = cheerio.load(html);
+            console.log($(".text-strong div").text());
+
+           res.json("yall did it");
 
         }
 
