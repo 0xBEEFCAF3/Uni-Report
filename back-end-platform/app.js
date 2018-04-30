@@ -24,6 +24,7 @@ const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const uniqid =  require('uniqid');
+const googleMaps = require('googlemaps');
 var app = module.exports = express.createServer();
 //oauth config
 const sessionConfig = {
@@ -224,7 +225,13 @@ function checkJwtAuth(req, res, next){
 // Routes
 app.get('/', authRequired,function(req, res){
 
-  res.json(req.headers.cookie);
+  let imageSchool = "https://www.bu.edu/bostonia/files/2015/02/campus-photo.jpg";
+  let imageSchool2 = "http://greenbillion.org/wp-content/uploads/2011/10/BostonUniversity.jpg";
+    res.render('home', {
+      imageSchool:imageSchool,
+      imageSchool2: imageSchool2,
+      name: (req.session.passport.user.displayName).split(" ")[0]
+    });
 });
 
 /*DEV functions of displaying and modifying the model*/
@@ -245,6 +252,12 @@ app.get('/deleteAllUsers',authRequired ,function(req, res){
   });
   res.send('deleted');
 });
+app.get('/clearCache',authRequired ,function(req, res){
+  cache.remove({}, function(err) { 
+   console.log('collection removed') 
+  });
+  res.send('deleted');
+});
 
 app.get('/profile',authRequired, function(req, res){
   if(req.session.passport){
@@ -259,9 +272,18 @@ app.get('/profile',authRequired, function(req, res){
 
   res.render('profile', {
         name:name,
-        imageUrl:imageUrl
+        imageUrl:imageUrl,
+        name: (req.session.passport.user.displayName).split(" ")[0]
     });
 });
+
+app.get('/search-school',authRequired, function(req, res){
+
+  res.render('search-school', {
+        userName: (req.session.passport.user.displayName).split(" ")[0]
+    });
+});
+
 
 app.post('/updateLikes', function(req, res){  
   let uniName =  req.body.uniName;
@@ -287,7 +309,7 @@ app.get('/getLikedUnis' ,function(req, res){
 });
 
 
-app.get('/sat/:uniName' ,function(req, res){
+app.get('/sat/:uniName',checkJwtAuth ,function(req, res){
   let uniName = req.params.uniName;
   //fist check cache
   cacheModel.checkCache("/sat", {uniName:uniName}).then(function(result) {
@@ -347,7 +369,7 @@ app.get('/sat/:uniName' ,function(req, res){
   }
 });   //end of SAT endpoint
 
-app.get('/act/:uniName', function(req, res){
+app.get('/act/:uniName',checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
 
   //fist check cache
@@ -408,7 +430,7 @@ app.get('/act/:uniName', function(req, res){
 });   //end of ACT endpoint
 
 
-app.get('/location/:uniName' ,function(req, res){
+app.get('/location/:uniName', checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
   let cacheResponse = null;
   //fist check cache
@@ -494,7 +516,7 @@ app.get('/location/:uniName' ,function(req, res){
  }
 });//end of location endpoint
 
-app.get('/info/:uniName' ,function(req, res){
+app.get('/info/:uniName',checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
 
 
@@ -523,7 +545,6 @@ app.get('/info/:uniName' ,function(req, res){
     let zip;
     let city;
     let website;
-
 
     request(infoUrl, function (error, response, body) {
       if (error) throw new Error(error);
@@ -558,7 +579,7 @@ app.get('/info/:uniName' ,function(req, res){
   }
 });
 
-app.get('/price/:uniName', function(req, res){
+app.get('/price/:uniName',checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
 
   //fist check cache
@@ -612,7 +633,7 @@ app.get('/price/:uniName', function(req, res){
 });
 
 
-app.get('/earnings/gender/:uniName' , function(req, res){
+app.get('/earnings/gender/:uniName',checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
   //fist check cache
   cacheModel.checkCache("/earnings/gender", {uniName:uniName}).then(function(result) {
@@ -683,7 +704,7 @@ app.get('/earnings/gender/:uniName' , function(req, res){
 });
 
 
-app.get('/earnings/avg/:uniName', function(req, res){
+app.get('/earnings/avg/:uniName',checkJwtAuth, function(req, res){
   let uniName = req.params.uniName;
 
   //fist check cache
@@ -756,7 +777,9 @@ app.get('/earnings/avg/:uniName', function(req, res){
   }
 });
 
-app.get('/rmp/:uniName', checkJwtAuth,function(req, res){
+
+
+app.get('/rmp/:uniName', checkJwtAuth, function(req, res){
   console.log("THE HEADER", req.headers.cookie);
   let uniName = req.params.uniName;
   //fist check cache
@@ -792,8 +815,7 @@ app.get('/rmp/:uniName', checkJwtAuth,function(req, res){
         sid = sid.split("?")[1];
 
             let ratingURL =  "http://www.ratemyprofessors.com/campusRatings.jsp?" + sid;
-            console.log("the rating url and sid");
-            console.log(ratingURL, sid);
+            
             request(ratingURL, function(error, response, html){
               if(!error){
                   var $ = cheerio.load(html);
@@ -833,13 +855,116 @@ app.get('/rmp/:uniName', checkJwtAuth,function(req, res){
 });
 
 
+
+
+app.get('/rating/:uniName',function(req, res){
+
+  let uniName = req.params.uniName;
+  //fist check cache
+  cacheModel.checkCache("/rating", {uniName:uniName}).then(function(result) {
+        cacheResponse = result;
+        if(Object.keys(cacheResponse).length === 0 && cacheResponse.constructor === Object){
+          //case if api call is not in cache
+          console.log(cacheResponse);
+          callAPI();//just call the api
+          return;
+        }
+        res.json(cacheResponse);//send json'd cache object.
+
+    }, function(err) {
+        console.log(err);
+  });
+
+  function callAPI(){
+    let url = 'https://www.usnews.com/best-colleges/search?school-name='+ uniName;
+
+    var options = { method: 'GET',
+  url: 'https://www.usnews.com/best-colleges/search',
+  qs: { 'school-name': 'boston university' },
+  headers: 
+   { 'postman-token': 'cce28961-68c1-946b-afdd-1222136fd97a',
+     'cache-control': 'no-cache' } };
+
+
+
+
+    request(options, function(error, response, html){
+        if(!error){
+            console.log(response);
+            let $ = cheerio.load(html);
+            console.log($(".text-strong div").text());
+
+           res.json("yall did it");
+
+        }
+
+      });//first request
+
+  //end of the rmp route
+  }
+});
+
+//get static url lib
+function getStaticImage(schoolName){
+  var publicConfig = {
+    key: "AIzaSyDcwz-wYyiZlwyRUhMVZxOVotvqX5SKv0k",
+    stagger_time:       1000, // for elevationPath 
+    encode_polylines:   false,
+    secure:             true, // use https 
+    proxy:              'http://127.0.0.1:8080' // optional, set a proxy for HTTP requests 
+  };
+  var gmAPI = new googleMaps(publicConfig);
+  var params = {
+  center: schoolName,
+  zoom: 15,
+  size: '500x300',
+  maptype: 'roadmap',
+  markers: [
+    {
+      location: schoolName,
+      label   : 'A',
+      color   : 'green',
+      shadow  : true
+    }
+  ],
+  style: [
+    {
+      feature: 'road',
+      element: 'all',
+      rules: {
+        hue: '0x00ff00'
+      }
+    }
+  ],
+  path: [
+    {
+      color: '0x0000ff',
+      weight: '5',
+      points: [
+        '41.139817,-77.454439',
+        '41.138621,-77.451596'
+      ]
+    }
+  ]
+};
+
+  return gmAPI.staticMap(params); // return static map URL
+}
+
 app.get('/schoolreport/:uniName',authRequired, function(req, res) {
+  //res.json(req.session); 
     let uniName = req.params.uniName;
+    let staticURL = getStaticImage(uniName);
+    console.log(staticURL);
+
     res.render('school-report', {
         uniName:String(uniName.replace("+", " ")),
-        uniNameApiString:String(uniName)
+        uniNameApiString:String(uniName),
+        userName: (req.session.passport.user.displayName).split(" ")[0],
+        staticURL: staticURL
 
     });
+    
 });
 
 

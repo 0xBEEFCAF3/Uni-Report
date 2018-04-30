@@ -1,3 +1,5 @@
+<% name = userName; %>
+
 <% include ../partials/head %>
 <% include ../partials/header %>
 <!-- MAIN -->
@@ -8,36 +10,38 @@
 					<!-- OVERVIEW -->
 					<div class="panel panel-headline">
 						<div class="panel-heading">
-							<h1 class="panel-title"><%= uniName %></h1>
+							<h1 class="panel-title" style="text-transform:capitalize;font-size: 36px;"><%= uniName %></h1>
 							<div id="like-uni"> </div>
 						</div>
-						<div id="rmp" class="panel-body">
-							
+						<div class="panel-body">
+							<img src="<%= staticURL %>">
 						</div>
 					</div>
 					<!-- END OVERVIEW -->
 					<div class="row">
-						<div class="col-md-6">
+						<div class="col-md-4">
+							<!-- RECENT PURCHASES -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">University Campus Properties</h3>
+									
+								</div>
+								
+								<div class="panel-footer">
+									<div id="rmp" class="panel-body">
+								</div>
+								</div>
+							</div>
+							<!-- END RECENT PURCHASES -->
+						</div>
+						<div class="col-md-4">
 							<!-- RECENT PURCHASES -->
 							<div class="panel">
 								<div class="panel-heading">
 									<h3 class="panel-title">Standardized Testing</h3>
 									
 								</div>
-								<div class="panel-body no-padding">
-									<table class="table table-striped">
-										<thead>
-											<tr>
-												
-											</tr>
-										</thead>
-										<tbody>
-											<tr>
-												
-											</tr>
-										</tbody>
-									</table>
-								</div>
+								
 								<div class="panel-footer">
 									<div id="standTestComp" class="panel-body">
 							
@@ -46,18 +50,17 @@
 							</div>
 							<!-- END RECENT PURCHASES -->
 						</div>
-						<div class="col-md-6">
+						<div class="col-md-4">
 							<!-- MULTI CHARTS -->
 							<div class="panel">
 								<div class="panel-heading">
-									<h3 class="panel-title">Projection vs. Realization</h3>
-									<div class="right">
-										<button type="button" class="btn-toggle-collapse"><i class="lnr lnr-chevron-up"></i></button>
-										<button type="button" class="btn-remove"><i class="lnr lnr-cross"></i></button>
-									</div>
-								</div>
-								<div class="panel-body">
+									<h3 class="panel-title">Projected Earnings</h3>
 									
+								</div>
+								<div class="panel-footer">
+									<div class="panel-body" id="earningHelper">
+										
+									</div>
 								</div>
 							</div>
 							<!-- END MULTI CHARTS -->
@@ -68,91 +71,61 @@
 							<!-- TODO LIST -->
 							<div class="panel">
 								<div class="panel-heading">
-									<h3 class="panel-title">Location</h3>
-									<div class="right">
+									<h3 class="panel-title">Food</h3>
+									
+								</div>
+								<div class="panel-footer">
+									<div class="panel-body" id="locationComp">
 										
 									</div>
-								</div>
-								<div class="panel-body">
-									<ul class="list-unstyled todo-list">
-										<li>
-											
-										</li>
-										<li>
-											
-										</li>
-										<li>
-											
-										</li>
-									</ul>
 								</div>
 							</div>
 							<!-- END TODO LIST -->
 						</div>
 						<div class="col-md-5">
 							<!-- TIMELINE -->
-							<div class="panel panel-scrolling">
+							<div class="panel">
 								<div class="panel-heading">
-									<h3 class="panel-title">Finances</h3>
-									<div class="right">
+									<h3 class="panel-title"> Annual expected Males and Females </h3>
+									
+								</div>
+								<div class="panel-footer">
+									<div class="panel-body" id="genderComp">
 										
 									</div>
-								</div>
-								<div class="panel-body">
 								</div>
 							</div>
 							<!-- END TIMELINE -->
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-md-4">
+						<div class="col-md-6">
 							<!-- TASKS -->
 							<div class="panel">
 								<div class="panel-heading">
-									<h3 class="panel-title">Other...</h3>
-									<div class="right">
-										<button type="button" class="btn-toggle-collapse"><i class="lnr lnr-chevron-up"></i></button>
-										<button type="button" class="btn-remove"><i class="lnr lnr-cross"></i></button>
-									</div>
+									<h3 class="panel-title">Tuition Estimate Calculator</h3>
 								</div>
-								<div class="panel-body">
-									
+								<div class="panel-footer">
+									<div class="panel-body" id="calcComp">
+									</div>
 								</div>
 							</div>
 							<!-- END TASKS -->
 						</div>
-						<div class="col-md-4">
+						<div class="col-md-6">
 							<!-- VISIT CHART -->
 							<div class="panel">
 								<div class="panel-heading">
-									<h3 class="panel-title">Visits</h3>
-									<div class="right">
-										<button type="button" class="btn-toggle-collapse"><i class="lnr lnr-chevron-up"></i></button>
-										<button type="button" class="btn-remove"><i class="lnr lnr-cross"></i></button>
-									</div>
+									<h3 class="panel-title">University Information</h3>
 								</div>
-								<div class="panel-body">
-									
+								<div class="panel-footer">
+									<div class="panel-body" id="informationComp">
+									</div>
 								</div>
 							</div>
 							<!-- END VISIT CHART -->
 						</div>
-						<div class="col-md-4">
-							<!-- REALTIME CHART -->
-							<div class="panel">
-								<div class="panel-heading">
-									<h3 class="panel-title">Other</h3>
-									<div class="right">
-										<button type="button" class="btn-toggle-collapse"><i class="lnr lnr-chevron-up"></i></button>
-										<button type="button" class="btn-remove"><i class="lnr lnr-cross"></i></button>
-									</div>
-								</div>
-								<div class="panel-body">
-									
-								</div>
-							</div>
-							<!-- END REALTIME CHART -->
-						</div>
+						
 					</div>
 				</div>
 			</div>
@@ -168,6 +141,11 @@
 					bundle.rmpHelper(schoolName);
 					bundle.likeUniHelper(schoolName);
 					bundle.satActHelper(schoolName);
+					bundle.earningHelper(schoolName);
+					bundle.locationHelper(schoolName);
+					bundle.genderHelper(schoolName);
+					bundle.informationHelper(schoolName);
+					bundle.priceCalcHelper(schoolName);
 				});
 
 		</script>

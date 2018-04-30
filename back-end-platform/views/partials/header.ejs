@@ -12,10 +12,6 @@
 
 				<form class="navbar-form navbar-left nav-search">
 					<div class="input-group" id="nav-search">
-					<!--
-						<input type="text" value="" class="form-control" placeholder="Search dashboard...">
-						<span class="input-group-btn"><button type="button" class="btn btn-primary">Go</button></span>
-						-->
 					</div>
 				</form>
 				
@@ -31,10 +27,11 @@
 			<div class="sidebar-scroll">
 				<nav>
 					<ul class="nav">
-						<li><a href="/" class="active"><i class="lnr lnr-home"></i> <span>Home</span></a></li>
-						
+						<h4 style="margin:0 auto;padding: 5px;color: darkgray;">Hi <%= name %></h4>
+						<li><a href="/"><i class="lnr lnr-home"></i> <span>Home</span></a></li>
+						<li><a href="/search-school"><i class="lnr lnr-home"></i> <span>Search Schools</span></a></li>
 						<li>
-							<a href="#subPages" data-toggle="collapse" class="collapsed"><i class="lnr lnr-file-empty"></i> <span>Pages</span> <i class="icon-submenu lnr lnr-chevron-left"></i></a>
+							<a href="#subPages" data-toggle="collapse" class="collapsed"><i class="lnr lnr-file-empty"></i> <span>Other Pages</span> <i class="icon-submenu lnr lnr-chevron-left"></i></a>
 							<div id="subPages" class="collapse ">
 								<ul class="nav">
 									<li><a href="/profile" class="">Profile</a></li>
